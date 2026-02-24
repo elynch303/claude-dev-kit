@@ -91,14 +91,48 @@ After `dev-reviewer` returns:
 - If **FAIL with BLOCKER**: re-spawn the responsible sub-agent with the reviewer's exact issue list, then re-spawn `dev-reviewer` on the updated diff
 - If **FAIL with WARNING only**: surface warnings to user, ask whether to fix or proceed
 
+## Pre-commit: Stale Branch Check
+
+Before committing, check whether the feature branch has fallen behind the default branch:
+
+```bash
+DEFAULT_BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@')
+BEHIND=$(git rev-list --count HEAD.."origin/${DEFAULT_BRANCH}" 2>/dev/null || echo 0)
+if [ "$BEHIND" -gt 0 ]; then
+  echo "⚠️  Branch is $BEHIND commit(s) behind $DEFAULT_BRANCH. Consider rebasing to avoid merge conflicts."
+fi
+```
+
+Surface the warning to the user if behind > 0, but do not block the commit.
+
 ## Commit and PR
 
 ```bash
 # Stage only feature files — never .claude/, .env, settings
 git add [FILES_CREATED] [FILES_MODIFIED]
-git commit -m "feat: <description> (#<issue-number>)"
+
+# All AI-generated commits carry a Co-authored-by trailer for auditability
+git commit -m "feat: <description> (#<issue-number>)
+
+Co-authored-by: Claude Dev Kit <noreply@anthropic.com>"
+
 git push -u origin <branch>
-gh pr create --title "feat: <description>" --body "Closes #<N>\n\n<summary>"
+gh pr create --title "feat: <description>" --body "Closes #<N>
+
+## Changes
+<summary from sub-agents>
+
+🤖 Generated with Claude Dev Kit"
+```
+
+## Audit Log
+
+After every successful commit+PR, append an entry to `.claude/audit.log`:
+
+```bash
+cat >> .claude/audit.log <<EOF
+{"ts":"$(date -u +%Y-%m-%dT%H:%M:%SZ)","agent":"dev-lead","issue":"#<N>","branch":"<branch>","pr":"<pr-url>","files_created":[<list>],"files_modified":[<list>]}
+EOF
 ```
 
 Output the PR URL as the final response.

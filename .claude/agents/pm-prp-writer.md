@@ -38,6 +38,20 @@ If the feature involves a library or API:
 - `WebSearch` for the library's current documentation and version-specific gotchas
 - Note specific documentation URLs with relevant sections
 
+## Duplicate Check
+
+Before writing, check whether a PRP for this issue already exists:
+
+```bash
+ls PRPs/<slugified-title>.md 2>/dev/null
+```
+
+If the file exists:
+- Read it to understand its current content and confidence score
+- If it is outdated (missing acceptance criteria from the current issue body) or has confidence < 6, overwrite it
+- If it is recent and comprehensive, return: `PRP already exists at PRPs/<slug>.md (confidence: N/10) — skipping regeneration`
+- If unsure, create a versioned copy: `PRPs/<slug>-v2.md`
+
 ## PRP Structure
 
 Write to `PRPs/<slugified-title>.md` using this exact structure:

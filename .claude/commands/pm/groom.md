@@ -9,6 +9,15 @@ Invoke the `project-manager` orchestrator to groom issues. The PM will internall
 
 ## Steps
 
+### 0. Rate limit preflight
+
+```bash
+# Check GitHub API availability before making bulk calls
+gh api rate_limit --jq '.rate | "Remaining: \(.remaining)/\(.limit) (resets \(.reset | strftime("%H:%M")))"' 2>/dev/null || true
+```
+
+If remaining < 10, warn: "GitHub API rate limit is nearly exhausted. Wait until reset before grooming."
+
 ### 1. Identify issues to groom
 
 ```bash

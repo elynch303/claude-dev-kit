@@ -4,3 +4,7 @@ node_modules/
 __pycache__/
 *.pyc
 .DS_Store
+
+# SECURITY: settings.json may contain MCP API tokens injected by the installer.
+# Never commit this file. Each developer runs install.sh to configure their own tokens.
+.claude/settings.json

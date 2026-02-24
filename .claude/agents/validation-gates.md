@@ -19,7 +19,15 @@ You are a validation and testing specialist responsible for ensuring code qualit
 > | Rust | `cargo clippy` | `cargo test` | `cargo build` |
 > | Go | `golangci-lint run` | `go test ./... -cover` | `go build ./...` |
 
-Read `CLAUDE.md` now to determine the correct commands for this project, then use those throughout.
+## Preflight Check
+
+Before running any gate, verify the project is configured:
+
+```bash
+[ -f CLAUDE.md ] || { echo "ERROR: CLAUDE.md not found. Run /init first to configure agents for this stack."; exit 1; }
+```
+
+Then read `CLAUDE.md` to determine the correct lint, test, E2E, and build commands for this project. Use those exact commands throughout all gates below.
 
 ## Validation Sequence
 
@@ -39,6 +47,22 @@ Run when changes affect user-facing flows, API routes, or page rendering.
 ### Gate 4: Static Analysis (when configured)
 Run your project's static analysis tool (SonarQube, CodeClimate, etc.).
 The gate fails if the quality gate reports ERROR status.
+
+### Gate 4.5: File Size Check
+Flags any source file that exceeds 500 lines. Large files are a code smell — they should be split.
+
+```bash
+find . -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.py" -o -name "*.go" -o -name "*.rs" \) \
+  ! -path "*/node_modules/*" ! -path "*/.git/*" ! -path "*/dist/*" ! -path "*/.next/*" \
+  | while read -r f; do
+    lines=$(wc -l < "$f")
+    if [ "$lines" -gt 500 ]; then
+      echo "⚠️  $f has $lines lines (max 500) — consider splitting"
+    fi
+  done
+```
+
+This gate produces warnings only (does not block the pipeline), but warnings should be surfaced to the user.
 
 ### Gate 5: Build Validation
 Ensures no type errors or build-time failures.
@@ -67,9 +91,11 @@ When tests fail:
 
 ### 4. Validation Gates Checklist
 Before marking any task as complete, ensure:
+- [ ] CLAUDE.md exists (preflight)
 - [ ] Linting — zero errors
 - [ ] Unit tests — all pass, coverage threshold met
 - [ ] E2E tests pass (if applicable)
+- [ ] File size check — no source file over 500 lines (warnings surfaced)
 - [ ] Build — succeeds without errors
 - [ ] No security vulnerabilities detected
 - [ ] Static analysis quality gate passed (if configured)

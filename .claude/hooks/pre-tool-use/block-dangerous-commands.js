@@ -26,15 +26,16 @@ const SAFETY_LEVEL = 'high';
 
 const PATTERNS = [
   // CRITICAL - Catastrophic, unrecoverable
-  { level: 'critical', id: 'rm-home',          regex: /\brm\s+(-.+\s+)*["']?~\/?["']?(\s|$|[;&|])/,                        reason: 'rm targeting home directory' },
-  { level: 'critical', id: 'rm-home-var',      regex: /\brm\s+(-.+\s+)*["']?\$HOME["']?(\s|$|[;&|])/,                      reason: 'rm targeting $HOME' },
-  { level: 'critical', id: 'rm-home-trailing', regex: /\brm\s+.+\s+["']?(~\/?|\$HOME)["']?(\s*$|[;&|])/,                   reason: 'rm with trailing ~/ or $HOME' },
-  { level: 'critical', id: 'rm-root',          regex: /\brm\s+(-.+\s+)*\/(\*|\s|$|[;&|])/,                                 reason: 'rm targeting root filesystem' },
+  { level: 'critical', id: 'rm-home',          regex: /\brm\s+(-.+\s+)*~(\/|\s|$|[;&|])/,                                  reason: 'rm targeting home directory' },
+  { level: 'critical', id: 'rm-home-quoted',   regex: /\brm\s+(-.+\s+)*["']~\/?["'](\s|$|[;&|])/,                         reason: 'rm targeting quoted home directory' },
+  { level: 'critical', id: 'rm-home-var',      regex: /\brm\s+(-.+\s+)*(\$HOME|\$\{HOME\})(\/|\s|$|[;&|])/,               reason: 'rm targeting $HOME' },
+  { level: 'critical', id: 'rm-home-trailing', regex: /\brm\s+.+\s+(~\/?|\$HOME|\$\{HOME\})(\s*$|[;&|])/,                 reason: 'rm with trailing ~/ or $HOME' },
+  { level: 'critical', id: 'rm-root',          regex: /\brm\s+(-.+\s+)*\/(\*|\s|$|[;&|])/,                                reason: 'rm targeting root filesystem' },
   { level: 'critical', id: 'rm-system',        regex: /\brm\s+(-.+\s+)*\/(etc|usr|var|bin|sbin|lib|boot|dev|proc|sys)(\/|\s|$)/, reason: 'rm targeting system directory' },
-  { level: 'critical', id: 'rm-cwd',           regex: /\brm\s+(-.+\s+)*(\.\/?|\*|\.\/\*)(\s|$|[;&|])/,                     reason: 'rm deleting current directory contents' },
-  { level: 'critical', id: 'dd-disk',          regex: /\bdd\b.+of=\/dev\/(sd[a-z]|nvme|hd[a-z]|vd[a-z]|xvd[a-z])/,         reason: 'dd writing to disk device' },
-  { level: 'critical', id: 'mkfs',             regex: /\bmkfs(\.\w+)?\s+\/dev\/(sd[a-z]|nvme|hd[a-z]|vd[a-z])/,            reason: 'mkfs formatting disk' },
-  { level: 'critical', id: 'fork-bomb',        regex: /:\(\)\s*\{.*:\s*\|\s*:.*&/,                                         reason: 'fork bomb detected' },
+  { level: 'critical', id: 'rm-cwd',           regex: /\brm\s+(-.+\s+)*(\.\/?|\*|\.\/\*)(\s|$|[;&|])/,                   reason: 'rm deleting current directory contents' },
+  { level: 'critical', id: 'dd-disk',          regex: /\bdd\b.+of=\/dev\/(sd[a-z]|nvme|hd[a-z]|vd[a-z]|xvd[a-z])/,       reason: 'dd writing to disk device' },
+  { level: 'critical', id: 'mkfs',             regex: /\bmkfs(\.\w+)?\s+\/dev\/(sd[a-z]|nvme|hd[a-z]|vd[a-z])/,          reason: 'mkfs formatting disk' },
+  { level: 'critical', id: 'fork-bomb',        regex: /:\(\)\s*\{.*:\s*\|\s*:.*&/,                                        reason: 'fork bomb detected' },
 
   // HIGH - Significant risk, data loss, security
   { level: 'high', id: 'curl-pipe-sh',   regex: /\b(curl|wget)\b.+\|\s*(ba)?sh\b/,                                        reason: 'piping URL to shell (RCE risk)' },
@@ -50,11 +51,11 @@ const PATTERNS = [
   { level: 'high', id: 'rm-ssh',         regex: /\brm\b.+\.ssh\/(id_|authorized_keys|known_hosts)/,                       reason: 'deleting SSH keys' },
 
   // STRICT - Cautionary, context-dependent
-  { level: 'strict', id: 'git-force-any',    regex: /\bgit\s+push\b(?!.+--force-with-lease).+(--force|-f)\b/,              reason: 'force push (use --force-with-lease)' },
-  { level: 'strict', id: 'git-checkout-dot', regex: /\bgit\s+checkout\s+\./,                                               reason: 'git checkout . discards changes' },
-  { level: 'strict', id: 'sudo-rm',          regex: /\bsudo\s+rm\b/,                                                       reason: 'sudo rm has elevated privileges' },
-  { level: 'strict', id: 'docker-prune',     regex: /\bdocker\s+(system|image)\s+prune/,                                   reason: 'docker prune removes images' },
-  { level: 'strict', id: 'crontab-r',        regex: /\bcrontab\s+-r/,                                                      reason: 'removes all cron jobs' },
+  { level: 'strict', id: 'git-force-any',    regex: /\bgit\s+push\b(?!.+--force-with-lease).+(--force|-f)\b/,             reason: 'force push (use --force-with-lease)' },
+  { level: 'strict', id: 'git-checkout-dot', regex: /\bgit\s+checkout\s+\./,                                              reason: 'git checkout . discards changes' },
+  { level: 'strict', id: 'sudo-rm',          regex: /\bsudo\s+rm\b/,                                                      reason: 'sudo rm has elevated privileges' },
+  { level: 'strict', id: 'docker-prune',     regex: /\bdocker\s+(system|image)\s+prune/,                                  reason: 'docker prune removes images' },
+  { level: 'strict', id: 'crontab-r',        regex: /\bcrontab\s+-r/,                                                     reason: 'removes all cron jobs' },
 ];
 
 const LEVELS = { critical: 1, high: 2, strict: 3 };
@@ -69,13 +70,92 @@ function log(data) {
   } catch {}
 }
 
+/**
+ * Normalize a command string before pattern matching to defeat trivial bypasses:
+ * - Collapse multiple spaces/tabs into single space
+ * - Normalize Unicode whitespace
+ * - Remove surrounding quotes from individual tokens (not from the whole string)
+ */
+function normalizeSegment(segment) {
+  return segment
+    .replace(/[\t\r\n\u00a0\u2002-\u200b\u202f\u205f\u3000]+/g, ' ')  // normalize whitespace variants
+    .replace(/\s{2,}/g, ' ')   // collapse multiple spaces
+    .trim();
+}
+
+/**
+ * Split a shell command on chain operators: &&, ||, ;, |, and newlines.
+ * This ensures each sub-command in a chain is checked independently.
+ * Handles quoted strings to avoid splitting inside them.
+ */
+function splitOnChainOperators(cmd) {
+  const segments = [];
+  let current = '';
+  let i = 0;
+  let inSingleQuote = false;
+  let inDoubleQuote = false;
+
+  while (i < cmd.length) {
+    const ch = cmd[i];
+    const ch2 = cmd.slice(i, i + 2);
+
+    // Track quote state
+    if (ch === "'" && !inDoubleQuote) {
+      inSingleQuote = !inSingleQuote;
+      current += ch;
+      i++;
+      continue;
+    }
+    if (ch === '"' && !inSingleQuote) {
+      inDoubleQuote = !inDoubleQuote;
+      current += ch;
+      i++;
+      continue;
+    }
+
+    // Split on chain operators when not inside quotes
+    if (!inSingleQuote && !inDoubleQuote) {
+      if (ch2 === '&&' || ch2 === '||') {
+        segments.push(current);
+        current = '';
+        i += 2;
+        continue;
+      }
+      if (ch === ';' || ch === '|' || ch === '\n') {
+        segments.push(current);
+        current = '';
+        i++;
+        continue;
+      }
+    }
+
+    current += ch;
+    i++;
+  }
+  if (current.trim()) segments.push(current);
+  return segments.map(normalizeSegment).filter(Boolean);
+}
+
 function checkCommand(cmd, safetyLevel = SAFETY_LEVEL) {
   const threshold = LEVELS[safetyLevel] || 2;
+
+  // Check the full command first (catches patterns that span operators)
   for (const p of PATTERNS) {
     if (LEVELS[p.level] <= threshold && p.regex.test(cmd)) {
       return { blocked: true, pattern: p };
     }
   }
+
+  // Then check each segment independently (catches chained dangerous commands)
+  const segments = splitOnChainOperators(cmd);
+  for (const segment of segments) {
+    for (const p of PATTERNS) {
+      if (LEVELS[p.level] <= threshold && p.regex.test(segment)) {
+        return { blocked: true, pattern: p };
+      }
+    }
+  }
+
   return { blocked: false, pattern: null };
 }
 
@@ -112,5 +192,5 @@ async function main() {
 if (require.main === module) {
   main();
 } else {
-  module.exports = { PATTERNS, LEVELS, SAFETY_LEVEL, checkCommand };
+  module.exports = { PATTERNS, LEVELS, SAFETY_LEVEL, checkCommand, splitOnChainOperators, normalizeSegment };
 }

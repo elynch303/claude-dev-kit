@@ -9,6 +9,14 @@ Run the full planning pipeline for an epic (GitHub milestone). At the end, every
 
 ## Steps
 
+### 0. Rate limit preflight
+
+```bash
+gh api rate_limit --jq '.rate | "Remaining: \(.remaining)/\(.limit) (resets \(.reset | strftime("%H:%M")))"' 2>/dev/null || true
+```
+
+If remaining < 20, warn: "GitHub API rate limit is low. Epic planning makes many API calls — wait until reset or reduce the epic size."
+
 ### 1. Identify the epic
 
 ```bash

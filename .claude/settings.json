@@ -15,8 +15,13 @@
       "Bash(gemini:*)",
       "Bash(gemini -p:*)"
     ],
-    "deny": [],
-    "ask": []
+    "deny": [
+      "Bash(rm -rf:*)",
+      "Bash(chmod 777:*)",
+      "Read(.env)",
+      "Read(.env.*)",
+      "Edit(.claude/settings.json)"
+    ]
   },
   "outputStyle": "default",
   "hooks": {

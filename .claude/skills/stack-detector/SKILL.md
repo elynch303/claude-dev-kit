@@ -1,5 +1,5 @@
 ---
-version: 1.0.0
+version: 1.1.0
 name: stack-detector
 description: Detects the technology stack of a project by analyzing manifest files and dependencies. Returns a structured stack map JSON. Used by /init and other commands that need stack awareness.
 ---
@@ -14,12 +14,19 @@ Identify the complete technology stack from project files without running any co
 ## Detection Steps
 
 ### Step 1: Read manifest files (in parallel)
-```bash
-cat package.json 2>/dev/null
-cat pyproject.toml 2>/dev/null
-cat Cargo.toml 2>/dev/null
-cat go.mod 2>/dev/null
-ls prisma/ drizzle.config.* jest.config.* vitest.config.* playwright.config.* cypress.config.* capacitor.config.ts app.json 2>/dev/null
+Use the Read tool (not bash cat) to read these files — avoids shell injection with unusual paths:
+- `package.json`
+- `pyproject.toml`
+- `Cargo.toml`
+- `go.mod`
+- `deno.json` or `deno.jsonc`
+- `astro.config.*`
+
+Also check presence of these config files:
+```
+prisma/schema.prisma  drizzle.config.*  jest.config.*  vitest.config.*
+playwright.config.*   cypress.config.*  capacitor.config.ts  app.json
+deno.json  deno.jsonc  astro.config.mjs  astro.config.ts
 ```
 
 ### Step 2: Detect package manager
@@ -31,8 +38,12 @@ ls prisma/ drizzle.config.* jest.config.* vitest.config.* playwright.config.* cy
 | `package-lock.json` | `npm` |
 | `poetry.lock` | `poetry` |
 | `Pipfile.lock` | `pipenv` |
+| `deno.json` or `deno.jsonc` | `deno` |
 
 ### Step 3: Detect framework (first match wins)
+
+**Special case — Deno:** If `deno.json` or `deno.jsonc` exists, set `framework: "deno"` immediately and skip remaining JS detection.
+
 From package.json dependencies/devDependencies:
 - `"next"` → `nextjs`
 - `"@remix-run/node"` or `"@remix-run/serve"` → `remix`
@@ -41,6 +52,8 @@ From package.json dependencies/devDependencies:
 - `"@nestjs/core"` → `nestjs`
 - `"fastify"` → `fastify`
 - `"express"` → `express`
+- `"astro"` → `astro`
+- `"solid-js"` or `"@solidjs/start"` → `solidjs`
 
 From pyproject.toml:
 - `"fastapi"` → `fastapi`
@@ -50,7 +63,15 @@ From pyproject.toml:
 From go.mod: `go`
 From Cargo.toml: `rust`
 
-### Step 4: Detect ORM
+### Step 4: Detect Next.js router variant (important — different templates)
+If framework is `nextjs`:
+- Check if `app/` directory exists AND contains `layout.tsx` or `layout.js` → `routerVariant: "app"`
+- Otherwise if `pages/` directory exists → `routerVariant: "pages"`
+- Default to `"app"` (Next.js 13+ default)
+
+This affects the templateKey: `nextjs-prisma-app` vs `nextjs-prisma-pages`.
+
+### Step 5: Detect ORM
 - `prisma/schema.prisma` exists → `prisma`
 - `drizzle.config.*` exists → `drizzle`
 - `"mongoose"` in deps → `mongoose`
@@ -59,26 +80,35 @@ From Cargo.toml: `rust`
 - `"gorm"` in go.mod → `gorm`
 - `"sqlx"` in Cargo.toml → `sqlx`
 
-### Step 5: Detect test runner
+### Step 6: Detect test runner
 - `jest.config.*` → `jest`
 - `vitest.config.*` → `vitest`
 - `pytest.ini` or `conftest.py` → `pytest`
 - Rust → `cargo-test`
 - Go → `go-test`
+- Deno → `deno-test`
 
-### Step 6: Detect E2E runner
+### Step 7: Detect E2E runner
 - `playwright.config.*` → `playwright`
 - `cypress.config.*` → `cypress`
 
-### Step 7: Detect mobile
+### Step 8: Detect mobile
 - `capacitor.config.ts` → `capacitor`
 - `app.json` with `"expo"` key → `expo`
 
 ### Fallback: Gemini scan
-If framework is still unknown after all above steps:
+If framework is still unknown after all above steps AND Gemini CLI is available:
 ```bash
-gemini -p "@./ What framework, ORM, test runner, and E2E tool is this project using? Reply in format: FRAMEWORK:x ORM:x TEST:x E2E:x MOBILE:x"
+# Use the Read tool to get the current directory path first, then construct the command safely
+# IMPORTANT: always double-quote the path in the @ reference to handle spaces and special chars
+gemini -p "@'./' What framework, ORM, test runner, and E2E tool is this project using? Reply in format: FRAMEWORK:x ORM:x TEST:x E2E:x MOBILE:x"
 ```
+
+If `gemini` is not available, fall back to grep-based analysis:
+```bash
+grep -r "import\|require\|from" src/ app/ lib/ --include="*.ts" --include="*.js" --include="*.py" -l 2>/dev/null | head -10
+```
+Read 2-3 of those files and infer the framework from import patterns.
 
 ## Output Format
 
@@ -86,6 +116,7 @@ gemini -p "@./ What framework, ORM, test runner, and E2E tool is this project us
 {
   "framework": "nextjs",
   "frameworkVersion": "15",
+  "routerVariant": "app",
   "language": "typescript",
   "packageManager": "bun",
   "orm": "prisma",
@@ -115,5 +146,8 @@ Extract from `package.json` `scripts` where possible. Fallback defaults:
 | fastapi | `ruff check . && mypy .` | `pytest --cov` | `echo ok` |
 | django | `ruff check .` | `pytest --cov` | `python manage.py check` |
 | express | `npm run lint` | `npm test` | `npm run build` |
+| astro | `npm run lint` | `npm test` | `npm run build` |
+| solidjs | `npm run lint` | `npm test` | `npm run build` |
+| deno | `deno lint` | `deno test --coverage` | `deno compile` |
 | go | `golangci-lint run` | `go test ./... -cover` | `go build ./...` |
 | rust | `cargo clippy` | `cargo test` | `cargo build` |
