@@ -1,0 +1,64 @@
+{
+  "permissions": {
+    "allow": [
+      "Read",
+      "Write",
+      "Edit",
+      "Bash(git:*)",
+      "Bash(gh:*)",
+      "Bash(grep:*)",
+      "Bash(ls:*)",
+      "Bash(tree:*)",
+      "Bash(find:*)",
+      "Bash(cat:*)",
+      "Bash(echo:*)",
+      "Bash(gemini:*)",
+      "Bash(gemini -p:*)"
+    ],
+    "deny": [],
+    "ask": []
+  },
+  "outputStyle": "default",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo \"For context, today's date is $(date). Please keep this in mind.\""
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/pre-tool-use/block-dangerous-commands.js"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .claude/hooks/stop/context_monitor.py"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd .claude/hooks/skill-activation-prompt && node_modules/.bin/tsx skill-activation-prompt.ts"
+          }
+        ]
+      }
+    ]
+  }
+}

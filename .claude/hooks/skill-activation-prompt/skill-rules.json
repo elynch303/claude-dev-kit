@@ -1,0 +1,20 @@
+[
+  {
+    "skill": "verification-before-completion",
+    "priority": "critical",
+    "triggers": ["done", "complete", "finished", "implemented", "fixed", "ready", "working", "resolved"],
+    "message": "Use /verification-before-completion before claiming work is done or creating PRs — run verification commands and confirm output first."
+  },
+  {
+    "skill": "code-investigator",
+    "priority": "high",
+    "triggers": ["investigate", "how does", "how do", "trace", "debug", "understand", "look into", "explore", "find the", "why is", "what is", "where is", "call hierarchy", "who calls", "find all", "go to definition", "find references"],
+    "message": "Use /code-investigator for efficient targeted code investigation — saves tokens via precise searches."
+  },
+  {
+    "skill": "build-and-fix",
+    "priority": "high",
+    "triggers": ["build", "lint", "compile", "type error", "type check", "tsc", "bun run build", "fix errors", "format"],
+    "message": "Use /build-and-fix to auto-detect project type, run build, and fix simple errors (formatting/linting)."
+  }
+]

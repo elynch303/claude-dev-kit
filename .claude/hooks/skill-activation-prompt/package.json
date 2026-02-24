@@ -1,0 +1,16 @@
+{
+  "name": "skill-activation-prompt",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Claude Code UserPromptSubmit hook — suggests relevant skills based on prompt content",
+  "scripts": {
+    "start": "tsx skill-activation-prompt.ts"
+  },
+  "dependencies": {
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.7"
+  }
+}

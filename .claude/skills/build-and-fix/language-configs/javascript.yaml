@@ -1,0 +1,139 @@
+# JavaScript/TypeScript Language Configuration
+version: "1.1.0"
+name: javascript
+display_name: JavaScript/TypeScript
+priority: 2
+
+# Detection: Files that identify this as a JS/TS project
+detection:
+  required_files: [package.json]
+  confidence_boost_files: [tsconfig.json, package-lock.json, yarn.lock, pnpm-lock.yaml]
+  workspace_indicators:
+    file: package.json
+    pattern: '"workspaces"'
+
+# Package manager detection (check lock files in this order)
+package_manager_detection:
+  - lockfile: pnpm-lock.yaml
+    manager: pnpm
+  - lockfile: yarn.lock
+    manager: yarn
+  - lockfile: package-lock.json
+    manager: npm
+  - default: npm
+
+# Pre-flight checks (by package manager)
+preflight:
+  npm:
+    check_tool: npm --version
+    check_deps: test -d node_modules
+    install_hint: "Install Node.js from https://nodejs.org"
+  yarn:
+    check_tool: yarn --version
+    check_deps: test -d node_modules
+    install_hint: "Install Yarn: npm install -g yarn"
+  pnpm:
+    check_tool: pnpm --version
+    check_deps: test -d node_modules
+    install_hint: "Install pnpm: npm install -g pnpm"
+
+# Timeouts (seconds)
+timeouts:
+  build: 180
+  fix: 60
+
+# Build commands by package manager
+commands:
+  npm:
+    build: npm run build
+    check: npm run build --dry-run 2>/dev/null || npm run typecheck 2>/dev/null || true
+    lint: npm run lint
+    lint_fix: npm run lint -- --fix
+    format: npm run format 2>/dev/null || npx prettier --write .
+    test: npm test
+  yarn:
+    build: yarn build
+    check: yarn build --dry-run 2>/dev/null || yarn typecheck 2>/dev/null || true
+    lint: yarn lint
+    lint_fix: yarn lint --fix
+    format: yarn format 2>/dev/null || yarn prettier --write .
+    test: yarn test
+  pnpm:
+    build: pnpm build
+    check: pnpm build --dry-run 2>/dev/null || pnpm typecheck 2>/dev/null || true
+    lint: pnpm lint
+    lint_fix: pnpm lint --fix
+    format: pnpm format 2>/dev/null || pnpm prettier --write .
+    test: pnpm test
+
+# Error parsing - extract file:line:column from various tools
+error_parsing:
+  patterns:
+    # TypeScript errors: src/file.ts(10,5): error TS2322
+    - regex: '(.+)\((\d+),(\d+)\): error (TS\d+): (.+)'
+      file: 1
+      line: 2
+      column: 3
+      code: 4
+      message: 5
+    # ESLint errors: /path/file.js:10:5 error Message
+    - regex: '(.+):(\d+):(\d+)\s+(error|warning)\s+(.+)'
+      file: 1
+      line: 2
+      column: 3
+      severity: 4
+      message: 5
+    # Webpack/Vite errors
+    - regex: 'ERROR in (.+):(\d+):(\d+)'
+      file: 1
+      line: 2
+      column: 3
+    # Generic error with file path
+    - regex: 'Error: (.+) in (.+):(\d+)'
+      message: 1
+      file: 2
+      line: 3
+
+# Error patterns with auto-fixes (only include fixable errors)
+fixes:
+  - pattern: '\d+ errors? and \d+ warnings? potentially fixable with the `--fix` option'
+    action: lint_fix
+    description: Auto-fix ESLint errors with --fix flag
+    confidence: high
+  - pattern: '\d+ fixable with.*--fix'
+    action: lint_fix
+    description: Auto-fix ESLint errors
+    confidence: high
+  - pattern: 'Run Prettier to fix'
+    action: format
+    description: Fix formatting with Prettier
+    confidence: high
+  - pattern: 'style:.*\(prettier'
+    action: format
+    description: Fix Prettier formatting issues
+    confidence: medium
+
+# Bail immediately on these errors (no auto-fix possible)
+bail_on:
+  - pattern: 'error TS\d+:.*is not assignable to type'
+    description: TypeScript type mismatch
+  - pattern: 'error TS\d+:.*Property .* does not exist'
+    description: TypeScript missing property
+  - pattern: 'error TS\d+:.*Cannot find module'
+    description: TypeScript missing module
+  - pattern: 'SyntaxError:'
+    description: JavaScript syntax error
+  - pattern: 'ReferenceError:'
+    description: Undefined variable reference
+  - pattern: 'TypeError:'
+    description: Type error at runtime
+  - pattern: 'The engine "node" is incompatible'
+    description: Node.js version mismatch
+  - pattern: 'Module not found'
+    description: Missing dependency
+  - pattern: 'ENOENT.*package\.json'
+    description: Missing package.json
+
+# Limits
+max_errors: 15
+max_retries: 2

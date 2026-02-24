@@ -1,0 +1,37 @@
+---
+description: Run claude cli with MiniMax LLM to execute current promt
+---
+
+# Run Claude LLM
+
+Execute the prompt using Claude CLI with MiniMax LLM in background mode.
+
+## Instructions
+
+1. If `$ARGUMENTS` is **empty**, ask the user for their prompt and wait for their response.
+
+2. Set `PROMPT` to `$ARGUMENTS` (or the user's response if arguments were empty).
+
+   `PROMPT_ESCAPED` is properly shell-escaped `PROMPT`.
+
+3. **Launch in background** using **Bash** tool:
+   - `command`: `echo "PROMPT_ESCAPED" | env -u CLAUDECODE ccmy -p`
+   - `run_in_background`: `true`
+   - `description`: `MiniMax execution`
+
+4. **Wait for completion** using **TaskOutput** tool:
+   - `task_id`: the task ID returned from step 3
+   - `block`: `true`
+   - Do NOT set any timeout - let it run as long as necessary
+
+5. Display the result clearly:
+   ```
+   ### Claude with MiniMax LLM Response
+   [paste the response here]
+   ```
+
+## Behavior Notes
+
+- Do **not** impose any timeouts. Let the LLM work as long as necessary.
+- Do **not** check intermediate output. Wait for full completion.
+- Do **not** make any code changes or modify files unless the response explicitly requires it and user confirms.
