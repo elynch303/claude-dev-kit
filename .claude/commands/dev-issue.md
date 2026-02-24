@@ -1,6 +1,6 @@
 # Dev Issue Pipeline
 
-Implement the next open GitHub issue end-to-end: research → plan → code → test → PR.
+Implement a GitHub issue end-to-end using the `dev-lead` orchestrator. This command is equivalent to `/dev` and delegates all work to specialist sub-agents with clean context windows.
 
 ## Arguments
 - `$ARGUMENTS` — GitHub issue number (optional, defaults to next open issue)
@@ -8,43 +8,72 @@ Implement the next open GitHub issue end-to-end: research → plan → code → 
 ## Steps
 
 ### 1. Identify the issue
-- If no issue number given, run `gh issue list --state open --limit 10` and pick the lowest-numbered non-epic issue
-- Read the issue details with `gh issue view <number>`
-- Create and checkout branch: `feature/#<number>-<slugified-title>` from latest master
+If no issue number: `gh issue list --state open --limit 10 --json number,title` → pick the lowest-numbered non-epic issue.
 
-### 2. Generate PRP
-- Read `PRPs/INITIAL.md` and `PRPs/templates/prp_base.md` for format reference (if they exist)
-- Research the codebase: find related files, existing patterns, test patterns
-- Read `CLAUDE.md` for project conventions (stack, lint/test/build commands, patterns)
-- Write a complete PRP to `PRPs/<feature-name>.md` with implementation tasks, pseudocode, validation gates, and gotchas
+```bash
+gh issue view <number>
+```
 
-### 3. Implement
-- Follow the PRP task list sequentially
-- Mirror existing codebase patterns — read nearby files before writing new code
-- Write unit tests **alongside** implementation (NOT after)
+### 2. Check for PRP
+```bash
+ls PRPs/ 2>/dev/null
+```
+Read PRP if a matching slug file exists.
 
-### 4. Validate — run ALL gates in order, fix failures before proceeding
+### 3. Create branch
+```bash
+git checkout master && git pull origin master
+git checkout -b feature/#<number>-<slugified-title>
+```
 
-Read `CLAUDE.md` for the project's exact lint, test, and build commands, then run:
+### 4. Read CLAUDE.md
+Extract: lint command, test command, E2E command, build command, key conventions.
 
-- **Gate 1:** Lint — fix until clean
-- **Gate 2:** Unit tests with coverage — all pass, coverage threshold met
-- **Gate 3:** E2E tests — if changes affect user-facing flows or API routes
-- **Gate 4:** Static analysis — if project has SonarQube / CodeClimate / etc.
-- **Gate 5:** Build / type check — must compile cleanly with no errors
+### 5. Spawn dev-lead via Task tool
 
-Do NOT proceed to step 5 if any gate fails.
+```
+description: "Implement issue #<number>"
+agent: dev-lead
+prompt: |
+  ## Issue #<number>: <title>
 
-### 5. Ship
-- Stage only feature files (never `.claude/`, `.env`, or settings files)
-- Commit with a conventional commit message referencing the issue number
-- Push branch and create PR with `gh pr create`
-- Delete the PRP file
-- Output the PR URL
+  ### Acceptance Criteria
+  [extracted from issue body]
+
+  ### Definition of Done
+  [extracted from issue body]
+
+  ## PRP
+  [full PRP content, or "none — research the codebase"]
+
+  ## Branch
+  feature/#<number>-<slugified-title>
+
+  ## Validation Commands
+  - Lint:  [LINT_CMD from CLAUDE.md]
+  - Test:  [TEST_CMD from CLAUDE.md]
+  - E2E:   [E2E_CMD from CLAUDE.md, or "none"]
+  - Build: [BUILD_CMD from CLAUDE.md]
+
+  ## Key Conventions
+  [3-5 bullet points from CLAUDE.md — patterns, naming, file limits]
+
+  Classify the work (backend/frontend/fullstack), spawn appropriate sub-agents,
+  run all validation gates, return FILES_CREATED, FILES_MODIFIED, GATE_RESULTS.
+```
+
+### 6. Ship
+After dev-lead reports all gates passing:
+```bash
+git push -u origin feature/#<number>-<slugified-title>
+gh pr create \
+  --title "feat: <title> (#<number>)" \
+  --body "Closes #<number>\n\n[summary from dev-lead]\n\n🤖 Generated with Claude Dev Kit"
+```
+
+Output the PR URL.
 
 ## Important
-- **One branch per issue, one PR per issue**
-- Use dependency injection for external dependencies — keep code testable
-- Keep files under 500 lines
-- Do NOT commit `.claude/` files, `.env`, or settings files
-- Mirror the conventions already in the codebase (naming, file structure, error handling)
+- Never commit `.claude/`, `.env`, or settings files
+- Do not push if any validation gate failed
+- One branch per issue, one PR per issue
