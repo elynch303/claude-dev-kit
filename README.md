@@ -1,8 +1,8 @@
 # Claude Dev Kit
 
-> A portable `.claude/` plugin that turns Claude Code into a fully autonomous development team — from epic grooming through validated, reviewed PRs — on **any project, any stack**.
+> A portable `.claude/` plugin that turns Claude Code into a fully autonomous development team — from epic grooming through validated, reviewed PRs — on **any project, any stack**. Now with multi-AI CLI support and a self-improvement feedback loop.
 
-Drop it into a project and run `bash install.sh`. Claude gains two orchestrator agents, a full specialist sub-agent hierarchy, an MCP integration wizard, smart stack detection, and a complete delivery pipeline.
+Drop it into a project and run `bash install.sh`. Claude gains two orchestrator agents, a full specialist sub-agent hierarchy, an MCP integration wizard, smart stack detection, a complete delivery pipeline, **multi-AI task routing** (Gemini, Codex, Grok, Kimi, OpenCode), and a **self-improvement system** that gets better with every session.
 
 ---
 
@@ -170,9 +170,10 @@ bash /path/to/install.sh --mcp-only
 |-----------|---------|-----------|
 | **Claude Code CLI** | `claude mcp add` for MCP setup | For MCP wizard |
 | **Node.js or Bun** | Skill-activation hook | Yes |
-| **Python 3** | Context monitor hook | Yes |
+| **Python 3** | Context monitor + learning logger hooks | Yes |
 | **GitHub CLI** (`gh`) | Issue/PR operations in pipeline | For `/dev` commands |
-| **Gemini CLI** | Large codebase analysis | Recommended |
+| **Gemini CLI** | Large codebase analysis, 1M context tasks | Recommended |
+| **OpenCode CLI** | Codex, Grok, Kimi, and other model access | Optional |
 | **uv / uvx** | Serena MCP | For Serena only |
 
 ---
@@ -234,6 +235,24 @@ Reads the project structure and CLAUDE.md, so Claude understands the project bef
 | `/dev:review` | Code review of current branch |
 | `/fix-github-issue <N>` | Quick fix: read → implement → PR |
 
+### Multi-AI Management
+| Command | What it does |
+|---------|-------------|
+| `/ai:detect` | Scan system for installed AI CLIs (Gemini, OpenCode, Codex, Grok, etc.) and update `providers.json` |
+| `/ai:switch <provider>` | Change the default AI provider for routed tasks |
+| `/ai:route <task>` | Intelligently route a task to the best available AI based on task type |
+| `/bs:brainstorm_full <question>` | 7 AI models brainstorm in parallel → synthesized recommendation |
+| `/bs:gemini <task>` | Run a task directly with Gemini CLI |
+| `/bs:codex <task>` | Run a task with OpenAI Codex (via opencode) |
+| `/bs:grok <task>` | Run a task with Grok (via opencode) |
+| `/bs:kimi <task>` | Run a task with Kimi K2 (via opencode) |
+
+### Self-Improvement
+| Command | What it does |
+|---------|-------------|
+| `/improve [days=14]` | Analyze session learning data → propose skill rule and agent improvements |
+| `/self-improve [agents\|commands\|skills\|all]` | Multi-AI critique of the kit's own prompts → synthesize and optionally apply improvements |
+
 ### Utilities
 | Command | What it does |
 |---------|-------------|
@@ -274,9 +293,100 @@ The `UserPromptSubmit` hook suggests relevant skills based on keywords:
 | Skill | Triggered by | Purpose |
 |-------|-------------|---------|
 | `verification-before-completion` | done, complete, fixed | Run verification before claiming done |
-| `code-investigator` | debug, trace, how does, investigate | Serena-first targeted search |
+| `code-investigator` | debug, trace, how does, investigate, refactor | Serena-first targeted search |
 | `build-and-fix` | build, lint, compile, fix errors | Auto-fix simple build errors |
+| `ai-router` | use gemini, use codex, ask grok, route to, which ai, entire codebase | Route task to best available AI CLI |
+| `improve` | improve the kit, skill not triggering, agent failing | Analyze session data, propose kit improvements |
+| `self-improve` | critique the kit, self-improve, have AIs review | Multi-AI critique of kit prompts |
 | `stack-detector` | Used internally by /init | Detect project stack |
+
+---
+
+## Multi-AI Support
+
+Claude Code is always the **orchestrator** — it never becomes a different AI. Other AI CLIs are called as subprocesses and their output is returned to you via Claude.
+
+### Supported AI Providers
+
+| Provider | CLI | Best for | Context |
+|----------|-----|---------|---------|
+| **Claude** | `claude` | Reasoning, agents, architecture | 200k |
+| **Gemini** | `gemini` | Entire codebase scans, web search | **1M** |
+| **Codex** | `opencode` | Code generation, completion | 128k |
+| **Grok** | `opencode` | Speed, quick analysis | 131k |
+| **Kimi K2** | `opencode` | Coding, math | 128k |
+| **GLM** | `cczy` | Multilingual tasks | 128k |
+| **MiniMax** | `ccmy` | Multimodal tasks | 40k |
+
+### Quick start with multi-AI
+
+```bash
+# 1. Detect what's installed
+/ai:detect
+
+# 2. Route a task automatically
+/ai:route scan the entire codebase and identify architectural issues
+
+# 3. Run a specific AI
+/bs:gemini explain the authentication flow in this repo
+
+# 4. Brainstorm with all 7 AIs at once
+/bs:brainstorm_full what's the best way to add real-time updates to this app?
+```
+
+### Routing logic
+
+```
+Task: "scan entire codebase"     → Gemini  (1M context)
+Task: "quick summary of X"       → Grok    (fastest)
+Task: "implement function Y"     → Claude  (default)
+Task: "brainstorm approaches"    → multi   (all AIs)
+```
+
+---
+
+## Self-Improvement System
+
+The kit tracks its own usage and improves over time through two mechanisms:
+
+### 1. Learning Logger (automatic)
+
+After every session, a `Stop` hook captures to `.claude/learning/sessions/YYYY-MM-DD.jsonl`:
+- Which commands and skills were used
+- Which agents were spawned
+- Token consumption
+- Error patterns
+- User prompt fragments (for skill trigger analysis)
+
+Logs are pruned after 90 days.
+
+### 2. `/improve` — Pattern Analysis
+
+```
+/improve           # Analyze last 14 days
+/improve 30        # Analyze last 30 days
+/improve all       # Analyze all available data
+```
+
+Reads your session logs and:
+- Identifies skill activation gaps (phrases that should have triggered a skill but didn't)
+- Flags underused commands (candidates for removal or better docs)
+- Spots common error patterns with suggested fixes
+- Reports token hotspots (tasks that could use cheaper models)
+- Proposes concrete updates to `skill-rules.json`
+
+### 3. `/self-improve` — Multi-AI Kit Critique
+
+```
+/self-improve              # Critique everything
+/self-improve agents       # Focus on agent prompts
+/self-improve skills       # Focus on skill definitions
+/self-improve commands     # Focus on slash commands
+```
+
+Reads the kit's own agent/skill/command files, sends them to all available AIs for critique, synthesizes consensus improvements, and optionally applies them + creates a PR.
+
+Run monthly or after major feature additions.
 
 ---
 
@@ -286,6 +396,7 @@ The `UserPromptSubmit` hook suggests relevant skills based on keywords:
 |------|-------------|
 | **Block Dangerous Commands** | Intercepts Bash calls — blocks rm ~, force push main, git reset --hard, .env reads, etc. (configurable: critical/high/strict) |
 | **Context Monitor** | Warns at 65% context, stops at 85% — instructs to `/clear` |
+| **Learning Logger** | Captures session data after each session for self-improvement analysis |
 | **Skill Suggester** | Watches your prompts — surfaces the right skill at the right time |
 
 ---
@@ -331,3 +442,13 @@ PRs welcome. To add support for a new stack:
 1. Add `.claude/templates/stacks/<framework>-<orm>.md` with `BACKEND_AGENT_BODY`, `FRONTEND_AGENT_BODY`, `TEST_AGENT_BODY`, `E2E_AGENT_BODY` sections
 2. Add detection logic to `.claude/skills/stack-detector/SKILL.md`
 3. Add an example to `examples/agents/`
+
+To add a new AI provider:
+1. Add an entry to `.claude/providers.json` with `cli`, `run_cmd`, `strengths`, and `context_window`
+2. Update `/ai:detect` detection logic in `.claude/commands/ai/detect.md`
+3. Add a brainstorm command to `.claude/commands/bs/<provider>.md` (optional)
+4. Update the routing table in `.claude/skills/ai-router/SKILL.md` if the provider has a unique strength
+
+To improve the kit automatically:
+- Run `/improve` after a few sessions to get data-driven suggestions
+- Run `/self-improve` monthly for multi-AI critique of the kit's own prompts

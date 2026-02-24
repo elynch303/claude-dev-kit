@@ -1,0 +1,93 @@
+{
+  "_comment": "AI Provider Registry — tracks available AI CLI tools and their capabilities. Run /ai:detect to refresh 'available' flags.",
+  "default": "claude",
+  "routing": {
+    "large_context": "gemini",
+    "speed": "grok",
+    "coding": "claude",
+    "brainstorm": "multi",
+    "codebase_scan": "gemini"
+  },
+  "providers": {
+    "claude": {
+      "name": "Claude (Claude Code)",
+      "cli": "claude",
+      "run_cmd": "echo \"{prompt}\" | env -u CLAUDECODE claude -p --agent deep-think-partner",
+      "type": "piped",
+      "available": true,
+      "strengths": ["reasoning", "agents", "coding", "architecture", "orchestration"],
+      "context_window": 200000,
+      "notes": "Primary orchestrator. Always available when running inside Claude Code."
+    },
+    "gemini": {
+      "name": "Gemini CLI",
+      "cli": "gemini",
+      "run_cmd": "gemini -p \"{prompt}\"",
+      "type": "cli",
+      "available": null,
+      "strengths": ["large-context", "codebase-search", "web-search", "multimodal"],
+      "context_window": 1000000,
+      "notes": "Best for large codebase scans, web searches, and tasks requiring 1M+ token context."
+    },
+    "codex": {
+      "name": "OpenAI Codex (via opencode)",
+      "cli": "opencode",
+      "run_cmd": "opencode run --model openai/gpt-5.3-codex \"{prompt}\"",
+      "type": "cli",
+      "available": null,
+      "strengths": ["coding", "code-completion", "code-explanation"],
+      "context_window": 128000,
+      "notes": "OpenAI's code-optimized model. Requires opencode CLI and OPENAI_API_KEY."
+    },
+    "grok": {
+      "name": "Grok (via opencode)",
+      "cli": "opencode",
+      "run_cmd": "opencode run --model openrouter/x-ai/grok-4.1-fast \"{prompt}\"",
+      "type": "cli",
+      "available": null,
+      "strengths": ["speed", "reasoning", "current-events"],
+      "context_window": 131072,
+      "notes": "Fast reasoning model. Good for quick analysis and time-sensitive tasks."
+    },
+    "kimi": {
+      "name": "Kimi K2 (via opencode)",
+      "cli": "opencode",
+      "run_cmd": "opencode run --model openrouter/moonshotai/kimi-k2.5 \"{prompt}\"",
+      "type": "cli",
+      "available": null,
+      "strengths": ["coding", "math", "long-context"],
+      "context_window": 128000,
+      "notes": "Strong coding and math model from Moonshot AI."
+    },
+    "glm": {
+      "name": "GLM (via cczy)",
+      "cli": "cczy",
+      "run_cmd": "echo \"{prompt}\" | env -u CLAUDECODE cczy -p --agent deep-think-partner",
+      "type": "piped",
+      "available": null,
+      "strengths": ["multilingual", "coding"],
+      "context_window": 128000,
+      "notes": "GLM model via custom CLI wrapper. Requires cczy installed."
+    },
+    "minimax": {
+      "name": "MiniMax (via ccmy)",
+      "cli": "ccmy",
+      "run_cmd": "echo \"{prompt}\" | env -u CLAUDECODE ccmy -p --agent deep-think-partner",
+      "type": "piped",
+      "available": null,
+      "strengths": ["multimodal", "multilingual"],
+      "context_window": 40960,
+      "notes": "MiniMax model via custom CLI wrapper. Requires ccmy installed."
+    },
+    "opencode": {
+      "name": "OpenCode (default model)",
+      "cli": "opencode",
+      "run_cmd": "opencode run \"{prompt}\"",
+      "type": "cli",
+      "available": null,
+      "strengths": ["coding", "multi-model"],
+      "context_window": 128000,
+      "notes": "OpenCode CLI — generic wrapper supporting many models via --model flag."
+    }
+  }
+}
