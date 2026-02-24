@@ -32,6 +32,10 @@ Is context > 100k tokens OR task = "scan entire codebase"?
   → YES: Use gemini (1M context window)
   → NO: Continue...
 
+Is task = "private", "confidential", "local only", "don't send to cloud", "offline", "sensitive"?
+  → YES: Use ollama if available (stays on machine), otherwise warn + use claude
+  → NO: Continue...
+
 Is task = "quick answer", "fast check", "brief analysis"?
   → YES: Use grok (fastest)
   → NO: Continue...
@@ -51,6 +55,7 @@ Is task = "multilingual", "translate", "non-English"?
 |-----------|-------------------|---------|
 | Large codebase scan | gemini | claude |
 | Web search + coding | gemini | claude |
+| Privacy / offline / no-cloud | **ollama** (local) | claude (warn) |
 | Quick analysis | grok | claude |
 | Code generation | claude | codex |
 | Brainstorming | multi | claude |
@@ -107,6 +112,8 @@ Label the output with the provider used:
 ## Important Notes
 
 - Always check availability before routing — fall back to claude if unavailable
-- Never route sensitive data (secrets, credentials) to external providers
+- **Privacy routing**: when `local: true` on a provider (Ollama), data never leaves the machine — actively prefer it for sensitive tasks
+- Never route sensitive data (secrets, credentials) to external cloud providers; Ollama is safe for this
 - If unsure about routing, default to claude
 - Large context tasks STRONGLY prefer gemini — it has 5x the context window
+- For Ollama, check the service is running before routing: `ollama list 2>/dev/null`

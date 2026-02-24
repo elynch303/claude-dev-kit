@@ -174,6 +174,7 @@ bash /path/to/install.sh --mcp-only
 | **GitHub CLI** (`gh`) | Issue/PR operations in pipeline | For `/dev` commands |
 | **Gemini CLI** | Large codebase analysis, 1M context tasks | Recommended |
 | **OpenCode CLI** | Codex, Grok, Kimi, and other model access | Optional |
+| **Ollama** | Local LLMs (privacy, offline, no-cost) | Optional |
 | **uv / uvx** | Serena MCP | For Serena only |
 
 ---
@@ -238,14 +239,15 @@ Reads the project structure and CLAUDE.md, so Claude understands the project bef
 ### Multi-AI Management
 | Command | What it does |
 |---------|-------------|
-| `/ai:detect` | Scan system for installed AI CLIs (Gemini, OpenCode, Codex, Grok, etc.) and update `providers.json` |
-| `/ai:switch <provider>` | Change the default AI provider for routed tasks |
+| `/ai:detect` | Scan system for installed AI CLIs (Gemini, OpenCode, Ollama, etc.) and update `providers.json` |
+| `/ai:switch <provider>` | Change the default AI provider — use `ollama:<model>` to switch Ollama models |
 | `/ai:route <task>` | Intelligently route a task to the best available AI based on task type |
 | `/bs:brainstorm_full <question>` | 7 AI models brainstorm in parallel → synthesized recommendation |
 | `/bs:gemini <task>` | Run a task directly with Gemini CLI |
 | `/bs:codex <task>` | Run a task with OpenAI Codex (via opencode) |
 | `/bs:grok <task>` | Run a task with Grok (via opencode) |
 | `/bs:kimi <task>` | Run a task with Kimi K2 (via opencode) |
+| `/bs:ollama <task>` | Run a task with a local Ollama model — no cloud, data stays on machine. Prefix with `model:name` to override |
 
 ### Self-Improvement
 | Command | What it does |
@@ -295,7 +297,7 @@ The `UserPromptSubmit` hook suggests relevant skills based on keywords:
 | `verification-before-completion` | done, complete, fixed | Run verification before claiming done |
 | `code-investigator` | debug, trace, how does, investigate, refactor | Serena-first targeted search |
 | `build-and-fix` | build, lint, compile, fix errors | Auto-fix simple build errors |
-| `ai-router` | use gemini, use codex, ask grok, route to, which ai, entire codebase | Route task to best available AI CLI |
+| `ai-router` | use gemini, use codex, use ollama, ask grok, route to, which ai, entire codebase, private, local only | Route task to best available AI CLI |
 | `improve` | improve the kit, skill not triggering, agent failing | Analyze session data, propose kit improvements |
 | `self-improve` | critique the kit, self-improve, have AIs review | Multi-AI critique of kit prompts |
 | `stack-detector` | Used internally by /init | Detect project stack |
@@ -308,15 +310,16 @@ Claude Code is always the **orchestrator** — it never becomes a different AI. 
 
 ### Supported AI Providers
 
-| Provider | CLI | Best for | Context |
-|----------|-----|---------|---------|
-| **Claude** | `claude` | Reasoning, agents, architecture | 200k |
-| **Gemini** | `gemini` | Entire codebase scans, web search | **1M** |
-| **Codex** | `opencode` | Code generation, completion | 128k |
-| **Grok** | `opencode` | Speed, quick analysis | 131k |
-| **Kimi K2** | `opencode` | Coding, math | 128k |
-| **GLM** | `cczy` | Multilingual tasks | 128k |
-| **MiniMax** | `ccmy` | Multimodal tasks | 40k |
+| Provider | CLI | Best for | Context | Local? |
+|----------|-----|---------|---------|--------|
+| **Claude** | `claude` | Reasoning, agents, architecture | 200k | No |
+| **Gemini** | `gemini` | Entire codebase scans, web search | **1M** | No |
+| **Codex** | `opencode` | Code generation, completion | 128k | No |
+| **Grok** | `opencode` | Speed, quick analysis | 131k | No |
+| **Kimi K2** | `opencode` | Coding, math | 128k | No |
+| **Ollama** | `ollama` | Privacy, offline, no-cost — any local model | 128k | **Yes** |
+| **GLM** | `cczy` | Multilingual tasks | 128k | No |
+| **MiniMax** | `ccmy` | Multimodal tasks | 40k | No |
 
 ### Quick start with multi-AI
 
@@ -327,8 +330,9 @@ Claude Code is always the **orchestrator** — it never becomes a different AI. 
 # 2. Route a task automatically
 /ai:route scan the entire codebase and identify architectural issues
 
-# 3. Run a specific AI
+# 3. Run with a specific AI
 /bs:gemini explain the authentication flow in this repo
+/bs:ollama explain this function  # stays local, no cloud
 
 # 4. Brainstorm with all 7 AIs at once
 /bs:brainstorm_full what's the best way to add real-time updates to this app?
@@ -340,8 +344,37 @@ Claude Code is always the **orchestrator** — it never becomes a different AI. 
 Task: "scan entire codebase"     → Gemini  (1M context)
 Task: "quick summary of X"       → Grok    (fastest)
 Task: "implement function Y"     → Claude  (default)
+Task: "private / confidential"   → Ollama  (local — no cloud)
 Task: "brainstorm approaches"    → multi   (all AIs)
 ```
+
+### Ollama — Local LLMs
+
+Run any model on your own hardware — zero cost, fully private, works offline.
+
+```bash
+# Install Ollama
+curl -fsSL https://ollama.ai/install.sh | sh
+
+# Pull a model (choose based on your needs)
+ollama pull llama3.2          # general purpose
+ollama pull codellama         # code generation
+ollama pull qwen2.5-coder     # strong coding model
+ollama pull deepseek-coder-v2 # coding + reasoning
+ollama pull mistral           # fast, good quality
+
+# Start the service
+ollama serve
+
+# Use it in the kit
+/ai:detect                        # auto-detects Ollama + lists models
+/bs:ollama explain this function  # one-off query
+/ai:switch ollama                 # make Ollama the default
+/ai:switch ollama:codellama       # switch to a specific model
+/ai:route <sensitive task>        # auto-routes private tasks to Ollama
+```
+
+Good models for coding tasks: `qwen2.5-coder`, `codellama`, `deepseek-coder-v2`
 
 ---
 

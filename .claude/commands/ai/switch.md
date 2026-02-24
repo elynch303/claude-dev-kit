@@ -1,6 +1,6 @@
 ---
-description: "Switch the default AI provider used for tasks. Run /ai:detect first to see available providers."
-argument-hint: [claude | gemini | codex | grok | kimi | glm | minimax | opencode]
+description: "Switch the default AI provider used for tasks. Run /ai:detect first to see available providers. Use 'ollama:<model>' to change the active Ollama model."
+argument-hint: [claude | gemini | codex | grok | kimi | ollama | ollama:<model> | glm | minimax | opencode]
 ---
 
 # /ai:switch — Switch Default AI Provider
@@ -17,6 +17,15 @@ REQUESTED = $ARGUMENTS (trimmed, lowercased)
 
 If `$ARGUMENTS` is empty, skip to the listing step below.
 
+**Special case — Ollama model switch:**
+If `REQUESTED` starts with `ollama:` (e.g. `ollama:codellama`):
+- Extract the model name after the colon: `MODEL = everything after "ollama:"`
+- Read providers.json
+- Verify `ollama` provider exists
+- Update `providers.ollama.model` to `MODEL`
+- Write updated providers.json
+- Report: `Ollama model set to: <MODEL>` and stop
+
 ### 2. Read providers.json
 
 ```bash
@@ -32,9 +41,14 @@ If not found:
 Unknown provider: "<REQUESTED>"
 
 Available providers:
-  claude, gemini, codex, grok, kimi, glm, minimax, opencode
+  claude, gemini, codex, grok, kimi, ollama, glm, minimax, opencode
 
-Run /ai:detect to check which are installed.
+For Ollama, you can also set the active model:
+  /ai:switch ollama:codellama
+  /ai:switch ollama:qwen2.5-coder
+  /ai:switch ollama:deepseek-coder-v2
+
+Run /ai:detect to check which are installed and list Ollama models.
 ```
 Stop.
 
@@ -92,13 +106,16 @@ All providers:
   ✓/✗ codex   — coding, code-completion          [requires opencode]
   ✓/✗ grok    — speed, reasoning                 [requires opencode]
   ✓/✗ kimi    — coding, math                     [requires opencode]
+  ✓/✗ ollama  — privacy, offline, no-cost [LOCAL] [requires ollama]
   ✓/✗ glm     — multilingual                     [requires cczy]
   ✓/✗ minimax — multimodal                       [requires ccmy]
   ✓/✗ opencode — coding, multi-model             [requires opencode]
 
 Usage:
-  /ai:switch gemini    — use Gemini as default
-  /ai:switch claude    — revert to Claude
-  /ai:detect           — refresh availability
-  /ai:route <task>     — route specific task to best AI
+  /ai:switch gemini           — use Gemini as default
+  /ai:switch ollama           — use Ollama (local) as default
+  /ai:switch ollama:codellama — switch to codellama model in Ollama
+  /ai:switch claude           — revert to Claude
+  /ai:detect                  — refresh availability + list Ollama models
+  /ai:route <task>            — route specific task to best AI
 ```

@@ -31,12 +31,25 @@ which gemini 2>/dev/null && gemini --version 2>/dev/null | head -1 || echo "NOT_
 # OpenCode (covers Codex, Grok, Kimi via --model flag)
 which opencode 2>/dev/null && opencode --version 2>/dev/null | head -1 || echo "NOT_FOUND"
 
+# Ollama (local LLMs)
+which ollama 2>/dev/null && ollama --version 2>/dev/null | head -1 || echo "NOT_FOUND"
+
 # GLM wrapper
 which cczy 2>/dev/null || echo "NOT_FOUND"
 
 # MiniMax wrapper
 which ccmy 2>/dev/null || echo "NOT_FOUND"
 ```
+
+### 2b. If Ollama is found, list available models
+
+```bash
+ollama list 2>/dev/null | tail -n +2 | awk '{print $1}'
+```
+
+Use this list to:
+- Confirm Ollama is running (if the command fails with a connection error, set a warning that `ollama serve` may not be running)
+- Set the `model` field in providers.json to the first available coding model found, using this preference order: `qwen2.5-coder`, `codellama`, `deepseek-coder-v2`, `llama3.2`, `llama3.1`, `mistral`, `gemma3` — or the first model in the list if none match
 
 ### 3. Build detection results
 
@@ -50,6 +63,7 @@ Special rules:
 - `codex`, `grok`, `kimi`: set to `true` if `opencode` is available
 - `glm`: set to `true` if `cczy` is available
 - `minimax`: set to `true` if `ccmy` is available
+- `ollama`: set to `true` if `ollama` binary found AND at least one model is installed; also update the `model` field with the best available model (see step 2b)
 
 ### 4. Update providers.json
 
@@ -64,16 +78,21 @@ Print a table:
 ```
 ## AI Provider Detection Results
 
-| Provider    | CLI        | Available | Strengths                    |
-|-------------|------------|-----------|------------------------------|
-| claude      | claude     | ✓         | reasoning, agents, coding    |
-| gemini      | gemini     | ✓ / ✗     | large-context, web-search    |
-| codex       | opencode   | ✓ / ✗     | coding, code-completion      |
-| grok        | opencode   | ✓ / ✗     | speed, reasoning             |
-| kimi        | opencode   | ✓ / ✗     | coding, math                 |
-| glm         | cczy       | ✓ / ✗     | multilingual                 |
-| minimax     | ccmy       | ✓ / ✗     | multimodal                   |
-| opencode    | opencode   | ✓ / ✗     | coding, multi-model          |
+| Provider    | CLI        | Available | Strengths                         |
+|-------------|------------|-----------|-----------------------------------|
+| claude      | claude     | ✓         | reasoning, agents, coding         |
+| gemini      | gemini     | ✓ / ✗     | large-context, web-search         |
+| codex       | opencode   | ✓ / ✗     | coding, code-completion           |
+| grok        | opencode   | ✓ / ✗     | speed, reasoning                  |
+| kimi        | opencode   | ✓ / ✗     | coding, math                      |
+| ollama      | ollama     | ✓ / ✗     | privacy, offline, no-cost [LOCAL] |
+| glm         | cczy       | ✓ / ✗     | multilingual                      |
+| minimax     | ccmy       | ✓ / ✗     | multimodal                        |
+| opencode    | opencode   | ✓ / ✗     | coding, multi-model               |
+
+## Ollama Models Installed
+<list from `ollama list`, or "none" if not installed>
+Active model: <value of providers.ollama.model>
 
 ## Current Default: <value of "default" field>
 
@@ -81,10 +100,13 @@ Print a table:
 Large context tasks → <routing.large_context>
 Speed tasks → <routing.speed>
 Coding tasks → <routing.coding>
+Privacy/offline tasks → ollama (if available)
 
 ## Tips
 - Install Gemini CLI: https://github.com/google-gemini/gemini-cli
 - Install OpenCode: https://opencode.ai/docs/installation
+- Install Ollama (local LLMs): https://ollama.ai — then run `ollama pull llama3.2`
+- Switch Ollama model: /ai:switch ollama:codellama
 - Run /ai:switch <provider> to change the default provider
 ```
 

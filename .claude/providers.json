@@ -88,6 +88,18 @@
       "strengths": ["coding", "multi-model"],
       "context_window": 128000,
       "notes": "OpenCode CLI — generic wrapper supporting many models via --model flag."
+    },
+    "ollama": {
+      "name": "Ollama (local LLMs)",
+      "cli": "ollama",
+      "run_cmd": "ollama run {model} \"{prompt}\"",
+      "type": "cli",
+      "available": null,
+      "local": true,
+      "model": "llama3.2",
+      "strengths": ["privacy", "offline", "no-cost", "customizable", "coding"],
+      "context_window": 128000,
+      "notes": "Run any model locally — no data leaves your machine. Set 'model' to any installed model (e.g. llama3.2, codellama, qwen2.5-coder, mistral, deepseek-coder-v2). Requires Ollama running: `ollama serve`. Install: https://ollama.ai"
     }
   }
 }

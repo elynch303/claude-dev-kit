@@ -20,8 +20,14 @@
   {
     "skill": "ai-router",
     "priority": "high",
-    "triggers": ["use gemini", "use codex", "use grok", "use kimi", "ask grok", "ask gemini", "route to", "which ai", "best ai for", "delegate to", "run with", "send to gemini", "let codex", "opencode", "other ai", "different model", "another model"],
+    "triggers": ["use gemini", "use codex", "use grok", "use kimi", "use ollama", "ask grok", "ask gemini", "ask ollama", "route to", "which ai", "best ai for", "delegate to", "run with", "send to gemini", "let codex", "opencode", "other ai", "different model", "another model", "local model", "local llm"],
     "message": "Use /ai:route to route this task to the best available AI CLI tool. Run /ai:detect first to see what's installed."
+  },
+  {
+    "skill": "ai-router",
+    "priority": "high",
+    "triggers": ["private", "confidential", "sensitive data", "don't send to cloud", "local only", "air-gapped", "offline mode", "no cloud", "keep it local"],
+    "message": "Use /ai:route for privacy-sensitive tasks — it will route to Ollama (local LLM) if available, keeping data on your machine."
   },
   {
     "skill": "ai-router",

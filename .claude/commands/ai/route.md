@@ -51,6 +51,10 @@ Analyze `TASK` against these patterns:
 - Keywords: "algorithm", "complexity", "O(n)", "optimize", "calculate", "math"
 - → Use kimi if available, otherwise claude
 
+**Privacy / local / sensitive:**
+- Keywords: "private", "don't send to cloud", "local only", "confidential", "sensitive data", "air-gapped", "offline", "no cloud"
+- → Use ollama if available (data stays on machine), otherwise warn the user and use claude
+
 **Default:** Use the `"default"` provider from providers.json.
 
 If selected provider is unavailable, fall back to claude.
@@ -65,11 +69,13 @@ Context window: <context_window> tokens
 ### 5. Execute with selected provider
 
 Read `run_cmd` from providers.json for the selected provider.
-Replace `{prompt}` with the escaped task content.
+Substitute template variables in `run_cmd`:
+- Replace `{prompt}` with the properly shell-escaped task content
+- Replace `{model}` with the value of `providers.<name>.model` (used by Ollama)
 
 **For type: cli:**
 ```bash
-<run_cmd with {prompt} substituted>
+<run_cmd with {prompt} and {model} substituted>
 ```
 
 **For type: piped:**
@@ -77,6 +83,12 @@ Replace `{prompt}` with the escaped task content.
 echo '<escaped_task>' | <run_cmd with {prompt} removed>
 ```
 (The piped CLI reads the prompt from stdin)
+
+**For Ollama specifically:** Before running, verify the Ollama service is reachable:
+```bash
+ollama list 2>/dev/null | head -1 || echo "OLLAMA_DOWN"
+```
+If `OLLAMA_DOWN`, inform the user: "Ollama is installed but not running. Start it with: `ollama serve`"
 
 Run in background if long-running:
 - `run_in_background: true` for tasks that may take > 30 seconds
