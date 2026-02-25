@@ -13,7 +13,15 @@
       "Bash(cat:*)",
       "Bash(echo:*)",
       "Bash(gemini:*)",
-      "Bash(gemini -p:*)"
+      "Bash(gemini -p:*)",
+      "Bash(opencode:*)",
+      "Bash(opencode run:*)",
+      "Bash(which:*)",
+      "Bash(python:*)",
+      "Bash(python3:*)",
+      "Bash(mkdir:*)",
+      "Bash(touch:*)",
+      "Bash(ollama:*)"
     ],
     "deny": [
       "Bash(rm -rf:*)",
@@ -51,6 +59,10 @@
           {
             "type": "command",
             "command": "python .claude/hooks/stop/context_monitor.py"
+          },
+          {
+            "type": "command",
+            "command": "python .claude/hooks/stop/learning_logger.py"
           }
         ]
       }

@@ -8,7 +8,7 @@
   {
     "skill": "code-investigator",
     "priority": "high",
-    "triggers": ["investigate", "how does", "how do", "trace", "debug", "understand", "look into", "explore", "find the", "why is", "what is", "where is", "call hierarchy", "who calls", "find all", "go to definition", "find references"],
+    "triggers": ["investigate", "how does", "how do", "trace", "debug", "understand", "look into", "explore", "find the", "why is", "what is", "where is", "call hierarchy", "who calls", "find all", "go to definition", "find references", "refactor", "reorganize", "understand the flow", "walk me through"],
     "message": "Use /code-investigator for efficient targeted code investigation — saves tokens via precise searches."
   },
   {
@@ -16,5 +16,35 @@
     "priority": "high",
     "triggers": ["build", "lint", "compile", "type error", "type check", "tsc", "bun run build", "fix errors", "format"],
     "message": "Use /build-and-fix to auto-detect project type, run build, and fix simple errors (formatting/linting)."
+  },
+  {
+    "skill": "ai-router",
+    "priority": "high",
+    "triggers": ["use gemini", "use codex", "use grok", "use kimi", "use ollama", "ask grok", "ask gemini", "ask ollama", "route to", "which ai", "best ai for", "delegate to", "run with", "send to gemini", "let codex", "opencode", "other ai", "different model", "another model", "local model", "local llm"],
+    "message": "Use /ai:route to route this task to the best available AI CLI tool. Run /ai:detect first to see what's installed."
+  },
+  {
+    "skill": "ai-router",
+    "priority": "high",
+    "triggers": ["private", "confidential", "sensitive data", "don't send to cloud", "local only", "air-gapped", "offline mode", "no cloud", "keep it local"],
+    "message": "Use /ai:route for privacy-sensitive tasks — it will route to Ollama (local LLM) if available, keeping data on your machine."
+  },
+  {
+    "skill": "ai-router",
+    "priority": "medium",
+    "triggers": ["entire codebase", "full project scan", "scan everything", "whole repo", "all files in"],
+    "message": "For large codebase scans, use /ai:route — Gemini's 1M token context may be better suited than Claude's 200k."
+  },
+  {
+    "skill": "improve",
+    "priority": "medium",
+    "triggers": ["improve the kit", "make the kit better", "kit is slow", "skill not triggering", "agent keeps failing", "optimize agents", "feedback", "what can be improved", "kit improvements"],
+    "message": "Use /improve to analyze session learning data and propose concrete improvements to agents, skills, and commands."
+  },
+  {
+    "skill": "self-improve",
+    "priority": "low",
+    "triggers": ["self-improve", "critique the kit", "improve itself", "meta-improve", "kit self-improvement", "have ais review"],
+    "message": "Use /self-improve to have multiple AI models critique and improve the kit's own prompts and configurations."
   }
 ]
