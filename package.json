@@ -1,0 +1,31 @@
+{
+  "name": "claude-dev-kit",
+  "version": "2.1.0",
+  "description": "Transform Claude Code into a fully autonomous development team — orchestrated sub-agents for planning, implementation, testing, and review.",
+  "bin": {
+    "claude-dev-kit": "./bin/claude-dev-kit.js"
+  },
+  "files": [
+    "bin/",
+    ".claude/agents/",
+    ".claude/commands/",
+    ".claude/hooks/",
+    ".claude/skills/",
+    ".claude/templates/",
+    "scripts/install.sh"
+  ],
+  "keywords": [
+    "claude",
+    "claude-code",
+    "anthropic",
+    "ai-agents",
+    "developer-tools",
+    "autonomous-development"
+  ],
+  "engines": { "node": ">=18" },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/evandempsey/claude-dev-kit"
+  }
+}

@@ -1,0 +1,10 @@
+# Security: settings.json may contain MCP API tokens — never publish
+.claude/settings.json
+
+# Cache files
+*.jsonl
+
+# Hook compiled artifacts
+.claude/hooks/skill-activation-prompt/node_modules/
+__pycache__/
+*.pyc

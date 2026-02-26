@@ -2,7 +2,7 @@
 
 > A portable `.claude/` plugin that turns Claude Code into a fully autonomous development team — from epic grooming through validated, reviewed PRs — on **any project, any stack**. Now with multi-AI CLI support and a self-improvement feedback loop.
 
-Drop it into a project and run `bash install.sh`. Claude gains two orchestrator agents, a full specialist sub-agent hierarchy, an MCP integration wizard, smart stack detection, a complete delivery pipeline, **multi-AI task routing** (Gemini, Codex, Grok, Kimi, OpenCode), and a **self-improvement system** that gets better with every session.
+Run `bunx claude-dev-kit@latest` in any project. Claude gains two orchestrator agents, a full specialist sub-agent hierarchy, an MCP integration wizard, smart stack detection, a complete delivery pipeline, **multi-AI task routing** (Gemini, Codex, Grok, Kimi, OpenCode), and a **self-improvement system** that gets better with every session.
 
 ---
 
@@ -113,7 +113,17 @@ Every implementation ends with `dev-reviewer` checking:
 ### Quick start
 
 ```bash
-git clone https://github.com/yourusername/claude-dev-kit /tmp/cdk
+# No clone needed — run directly with bunx or npx:
+cd /path/to/your/project
+bunx claude-dev-kit@latest
+# or
+npx claude-dev-kit@latest
+```
+
+Or if you prefer to clone first:
+
+```bash
+git clone https://github.com/evandempsey/claude-dev-kit /tmp/cdk
 bash /tmp/cdk/scripts/install.sh /path/to/your/project
 ```
 
@@ -161,6 +171,8 @@ All MCPs are installed with `--scope project` — they activate only in this pro
 ### MCP-only install (add integrations to existing project)
 
 ```bash
+bunx claude-dev-kit@latest --mcp-only
+# or
 bash /path/to/install.sh --mcp-only
 ```
 
