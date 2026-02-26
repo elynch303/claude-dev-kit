@@ -126,20 +126,27 @@ if [[ "$MCP_ONLY" == "false" ]]; then
     ask_yn "Install .claude/ into $TARGET?" || { echo "Aborted."; exit 0; }
   fi
 
-  # Backup existing .claude
+  # Merge CDK files into existing .claude/ (or create fresh if none)
+  # - CDK-owned dirs (agents, commands, hooks, skills, templates) are always updated
+  # - User-owned files (settings.json, CLAUDE.md) are never overwritten
   if [[ -d "$TARGET/.claude" ]]; then
-    BACKUP="$TARGET/.claude.bak.$(date +%Y%m%d_%H%M%S)"
-    warn "Existing .claude/ found — backing up to $(basename "$BACKUP")"
-    mv "$TARGET/.claude" "$BACKUP"
+    info "Existing .claude/ found — merging CDK files (settings.json and CLAUDE.md preserved)"
   fi
-
-  # Copy files
-  info "Copying .claude/ ..."
+  mkdir -p "$TARGET/.claude"
   if command -v rsync &>/dev/null; then
-    rsync -a --exclude='node_modules' --exclude='*.jsonl' \
+    rsync -a \
+      --exclude='settings.json' \
+      --exclude='CLAUDE.md' \
+      --exclude='node_modules' \
+      --exclude='*.jsonl' \
       "$KIT_ROOT/.claude/" "$TARGET/.claude/"
   else
-    cp -r "$KIT_ROOT/.claude" "$TARGET/.claude"
+    for dir in agents commands hooks skills templates; do
+      if [[ -d "$KIT_ROOT/.claude/$dir" ]]; then
+        mkdir -p "$TARGET/.claude/$dir"
+        cp -r "$KIT_ROOT/.claude/$dir/." "$TARGET/.claude/$dir/"
+      fi
+    done
     rm -rf "$TARGET/.claude/hooks/skill-activation-prompt/node_modules"
   fi
   success ".claude/ installed"
@@ -415,9 +422,10 @@ header "Installation Complete 🎉"
 echo ""
 
 if [[ "$MCP_ONLY" == "false" ]]; then
-  echo -e "  ${GREEN}✓${NC} .claude/ installed at $TARGET/.claude"
+  echo -e "  ${GREEN}✓${NC} .claude/ merged into $TARGET/.claude"
   echo -e "  ${GREEN}✓${NC} Hook dependencies installed"
   echo -e "  ${GREEN}✓${NC} .gitignore updated (settings.json excluded)"
+  echo -e "  ${DIM}  settings.json and CLAUDE.md were preserved if they existed${NC}"
 fi
 
 echo ""
