@@ -126,34 +126,19 @@ if [[ "$MCP_ONLY" == "false" ]]; then
     ask_yn "Install .claude/ into $TARGET?" || { echo "Aborted."; exit 0; }
   fi
 
-  # Merge CDK files into existing .claude/ (or create fresh if none)
-  # - CDK-owned dirs (agents, commands, hooks, skills, templates) are always updated
-  # - User-owned files (settings.json, CLAUDE.md) are never overwritten
-  if [[ -d "$TARGET/.claude" ]]; then
-    info "Existing .claude/ found — merging CDK files (settings.json and CLAUDE.md preserved)"
-  fi
-  mkdir -p "$TARGET/.claude"
-  if command -v rsync &>/dev/null; then
-    rsync -a \
-      --exclude='settings.json' \
-      --exclude='CLAUDE.md' \
-      --exclude='node_modules' \
-      --exclude='*.jsonl' \
-      "$KIT_ROOT/.claude/" "$TARGET/.claude/"
+  # ── Delegate all .claude/ file management to the migration tool ──────────────
+  # migrate.sh handles: categorization, conflict resolution, settings.json merge,
+  # CLAUDE.md merge, and manifest maintenance. It is safe to run standalone.
+  if bash "$SCRIPT_DIR/migrate.sh" "$KIT_ROOT" "$TARGET"; then
+    : # migrate.sh prints its own success messages
   else
-    for dir in agents commands hooks skills templates; do
-      if [[ -d "$KIT_ROOT/.claude/$dir" ]]; then
-        mkdir -p "$TARGET/.claude/$dir"
-        cp -r "$KIT_ROOT/.claude/$dir/." "$TARGET/.claude/$dir/"
-      fi
-    done
-    rm -rf "$TARGET/.claude/hooks/skill-activation-prompt/node_modules"
+    error "Migration failed — check output above"
+    exit 1
   fi
-  success ".claude/ installed"
 
-  # Ensure log directory exists now that .claude/ is present
+  # Ensure log directory + file exist now that .claude/ is present
   mkdir -p "$TARGET/.claude"
-  : > "$LOG_FILE"  # create/truncate log
+  : > "$LOG_FILE"
 
   # ── Inject .gitignore entries into target project ────────────────────────────
   TARGET_GITIGNORE="$TARGET/.gitignore"
@@ -161,20 +146,31 @@ if [[ "$MCP_ONLY" == "false" ]]; then
   if [[ -f "$TARGET_GITIGNORE" ]] && grep -qF "$GITIGNORE_MARKER" "$TARGET_GITIGNORE" 2>/dev/null; then
     info ".gitignore already contains CDK entries — skipping"
   else
-    info "Adding .gitignore entries to protect secrets..."
+    info "Adding .gitignore entries..."
     cat >> "$TARGET_GITIGNORE" <<'EOF'
 
 # Claude Dev Kit — managed entries
 # settings.json may contain MCP API tokens written by install.sh — never commit it.
 .claude/settings.json
-# Audit log and install log contain local paths — no need to track.
+# Audit log, install log, and migration manifest contain local paths — no need to track.
 .claude/audit.log
 .claude/install.log
+.claude/.cdk-manifest
+# Personal Claude overrides — machine-local, never shared with teammates.
+CLAUDE.local.md
 EOF
-    success ".gitignore updated (settings.json, audit.log, install.log excluded)"
+    success ".gitignore updated"
   fi
 
-  # Install hook dependencies
+  # ── Copy CLAUDE.local.md.example if not present ──────────────────────────────
+  EXAMPLE_SRC="$KIT_ROOT/CLAUDE.local.md.example"
+  EXAMPLE_DEST="$TARGET/CLAUDE.local.md.example"
+  if [[ -f "$EXAMPLE_SRC" && ! -f "$EXAMPLE_DEST" ]]; then
+    cp "$EXAMPLE_SRC" "$EXAMPLE_DEST"
+    info "CLAUDE.local.md.example added — copy to CLAUDE.local.md for personal preferences"
+  fi
+
+  # ── Install hook dependencies ─────────────────────────────────────────────
   HOOK_DIR="$TARGET/.claude/hooks/skill-activation-prompt"
   if [[ -f "$HOOK_DIR/package.json" ]]; then
     info "Installing skill-activation-prompt hook dependencies..."
@@ -193,6 +189,7 @@ EOF
     popd > /dev/null
     success "Hook dependencies installed"
   fi
+
 fi
 
 # ─── Phase 2: MCP Wizard ──────────────────────────────────────────────────────
