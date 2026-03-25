@@ -1,0 +1,81 @@
+{
+  "_comment": "Copy this file to settings.json. It is gitignored — each developer configures their own.",
+  "_hooks_note": "The hooks block below is the CDK default. If you have an existing settings.json, merge this hooks section into it.",
+  "permissions": {
+    "allow": [
+      "Read",
+      "Write",
+      "Edit",
+      "Bash(git:*)",
+      "Bash(gh:*)",
+      "Bash(grep:*)",
+      "Bash(ls:*)",
+      "Bash(tree:*)",
+      "Bash(find:*)",
+      "Bash(cat:*)",
+      "Bash(echo:*)",
+      "Bash(gemini:*)",
+      "Bash(gemini -p:*)",
+      "Bash(opencode:*)",
+      "Bash(which:*)",
+      "Bash(python:*)",
+      "Bash(python3:*)",
+      "Bash(mkdir:*)",
+      "Bash(touch:*)",
+      "Bash(ollama:*)"
+    ],
+    "deny": [
+      "Bash(rm -rf:*)",
+      "Bash(chmod 777:*)",
+      "Read(.env)",
+      "Read(.env.*)",
+      "Edit(.claude/settings.json)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo \"For context, today's date is $(date). Please keep this in mind.\""
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/pre-tool-use/block-dangerous-commands.js"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .claude/hooks/stop/context_monitor.py"
+          },
+          {
+            "type": "command",
+            "command": "python .claude/hooks/stop/learning_logger.py"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd .claude/hooks/skill-activation-prompt && node_modules/.bin/tsx skill-activation-prompt.ts"
+          }
+        ]
+      }
+    ]
+  }
+}

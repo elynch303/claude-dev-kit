@@ -8,3 +8,6 @@ __pycache__/
 # SECURITY: settings.json may contain MCP API tokens injected by the installer.
 # Never commit this file. Each developer runs install.sh to configure their own tokens.
 .claude/settings.json
+
+# Personal Claude overrides — machine-local, never shared with teammates.
+CLAUDE.local.md

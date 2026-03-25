@@ -1,0 +1,36 @@
+# CLAUDE.local.md — Personal Overrides
+
+> This file is personal to you. Copy it to `CLAUDE.local.md` (which is gitignored).
+> It loads alongside `CLAUDE.md` but never affects your teammates.
+
+---
+
+## My Experience Level
+
+<!-- Tell Claude how to calibrate explanations for you. -->
+<!-- Examples: -->
+<!-- "I'm a senior TypeScript engineer — skip basics, focus on tradeoffs." -->
+<!-- "I'm new to Prisma; explain ORM concepts when they come up." -->
+
+## My Local Setup
+
+<!-- Override project defaults for your machine. -->
+<!-- Examples: -->
+<!-- Local DB: postgresql://localhost:5432/myapp_dev -->
+<!-- Dev server port: 4000 -->
+<!-- I run migrations with: bun prisma migrate dev -->
+
+## My Workflow Preferences
+
+<!-- Personal habits Claude should respect. -->
+<!-- Examples: -->
+<!-- "Always show me the full file diff before writing, so I can approve." -->
+<!-- "I prefer smaller, focused PRs over large bundled ones." -->
+<!-- "Skip test output summaries — I'll read the raw output myself." -->
+
+## Editor / Terminal
+
+<!-- Context that helps Claude format output usefully for your environment. -->
+<!-- Examples: -->
+<!-- Terminal: Ghostty (supports 256 colors, Unicode) -->
+<!-- "When showing multi-file changes, use unified diff format." -->

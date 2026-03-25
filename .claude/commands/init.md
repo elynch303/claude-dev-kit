@@ -246,7 +246,54 @@ Files to update:
 - Dev commands table (extracted from `package.json` `scripts` or language conventions)
 - Validation gate commands
 
-### 5c. Update .claude/settings.json
+### 5c. Generate CLAUDE.local.md.example
+
+If `CLAUDE.local.md.example` does not already exist in the project root, copy `.claude/templates/CLAUDE.local.md.example` (or generate the standard template) so developers know they can create a personal `CLAUDE.local.md`.
+
+Also ensure `.gitignore` (or `.git/info/exclude` for projects without a shared `.gitignore`) contains `CLAUDE.local.md`.
+
+### 5d. Scaffold stack-specific rules overrides
+
+Check if `.claude/rules/` already exists. If not present, note to the user that the generic rules installed with CDK cover universal patterns. If a stack-specific rules file would add value (e.g., a `db-conventions.md` for Prisma schema practices, or a `components.md` for Next.js component hierarchy), generate it now:
+
+**Next.js + Prisma projects** — create `.claude/rules/db-conventions.md`:
+```markdown
+---
+globs: "prisma/**,app/generated/**,lib/db*"
+---
+
+# Database Conventions (Prisma)
+
+- Schema lives at `prisma/schema.prisma` — all model changes start here
+- Run `bun prisma migrate dev` to generate migrations from schema changes
+- Never edit generated migration files — re-generate if incorrect
+- Use `prisma.model.findFirst` for conflict checks — not `findUnique` on non-unique fields
+- Always call `db.refresh(obj)` / re-query after mutations to return updated state
+- Prisma client is a singleton — import from `lib/db`, never instantiate directly
+- Use `select` / `include` to fetch only the fields the caller needs
+```
+
+**FastAPI + SQLAlchemy projects** — create `.claude/rules/db-conventions.md`:
+```markdown
+---
+globs: "app/models/**,app/schemas/**,alembic/**"
+---
+
+# Database Conventions (SQLAlchemy 2.x)
+
+- Models at `app/models/<domain>.py` — use `mapped_column` and `Mapped[T]` for all columns
+- Schemas at `app/schemas/<domain>.py` — separate `Create`, `Update`, `Out` Pydantic models
+- Migrations via Alembic — never edit the DB schema directly in production
+- Use `AsyncSession` throughout — never use synchronous session in async endpoints
+- Always `await db.refresh(obj)` after commit to return accurate data to the caller
+- Use SQLAlchemy 2.x `select()` / `insert()` — no raw SQL unless absolutely necessary
+```
+
+**Express.js projects** — create `.claude/rules/db-conventions.md` if an ORM is detected, following the same pattern.
+
+Skip this step if stack is `generic` or no database layer was detected.
+
+### 5e. Update .claude/settings.json
 
 Read existing settings.json. Preserve the `hooks` section verbatim. Replace only the `permissions.allow` array with:
 
@@ -294,12 +341,20 @@ Read existing settings.json. Preserve the `hooks` section verbatim. Replace only
 - `.claude/agents/dev-e2e.md` — Playwright patterns
 - `CLAUDE.md` — project guide created/updated
 - `.claude/settings.json` — permissions updated
+- `.claude/rules/code-style.md` — universal code quality rules (all files)
+- `.claude/rules/security.md` — universal security practices (all files)
+- `.claude/rules/api-conventions.md` — HTTP/REST conventions (api/** files, path-scoped)
+- `.claude/rules/testing.md` — test structure and coverage rules (test files, path-scoped)
+- `.claude/rules/db-conventions.md` — database/ORM conventions (stack-specific, if applicable)
+- `CLAUDE.local.md.example` — personal override template (copy to `CLAUDE.local.md`)
 
 ### Next Steps
-1. **Review** `CLAUDE.md` and add any project-specific conventions
-2. **Run** `/primer` to verify Claude understands the project
-3. **Plan** your backlog: `/pm:groom` → `/pm:size` → `/pm:plan-epic`
-4. **Build**: `/dev <issue-number>` to implement your first feature
+1. **Personal setup**: Copy `CLAUDE.local.md.example` → `CLAUDE.local.md` and fill in your preferences (it's gitignored)
+2. **Review** `CLAUDE.md` and add any project-specific notes in the Project Notes section
+3. **Customize rules**: Edit `.claude/rules/*.md` files for project-specific conventions
+4. **Run** `/primer` to verify Claude understands the project
+5. **Plan** your backlog: `/pm:groom` → `/pm:size` → `/pm:plan-epic`
+6. **Build**: `/dev <issue-number>` to implement your first feature
 ```
 
 ---

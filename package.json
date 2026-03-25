@@ -10,8 +10,11 @@
     ".claude/agents/",
     ".claude/commands/",
     ".claude/hooks/",
+    ".claude/rules/",
+    ".claude/settings.json.example",
     ".claude/skills/",
     ".claude/templates/",
+    "CLAUDE.local.md.example",
     "scripts/install.sh"
   ],
   "keywords": [

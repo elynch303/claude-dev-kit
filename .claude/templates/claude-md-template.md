@@ -35,6 +35,16 @@
 ## Key Conventions
 <!-- KEY_CONVENTIONS -->
 
+> Detailed rules live in `.claude/rules/` — Claude loads them automatically:
+> - `code-style.md` — code quality and structure rules (all files)
+> - `security.md` — security practices (all files)
+> - `api-conventions.md` — HTTP status codes, response shapes, route structure (api/** files)
+> - `testing.md` — AAA pattern, coverage targets, mock strategy (test files)
+
+## Personal Overrides
+
+Copy `CLAUDE.local.md.example` → `CLAUDE.local.md` to set personal preferences (gitignored).
+
 ## Agent System (Claude Dev Kit)
 This project uses the claude-dev-kit autonomous development pipeline:
 
