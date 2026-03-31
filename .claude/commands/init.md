@@ -43,9 +43,18 @@ ls jest.config.* vitest.config.* playwright.config.* cypress.config.* pytest.ini
 # Mobile
 ls capacitor.config.ts app.json 2>/dev/null
 
-# CI/CD
+# CI/CD and VCS detection
 ls .github/workflows/ 2>/dev/null | head -5
+ls .gitlab-ci.yml .gitlab/ 2>/dev/null
+ls .github/ 2>/dev/null | head -3
 ls Dockerfile docker-compose.yml 2>/dev/null
+
+# Issue tracker / remote detection
+git remote get-url origin 2>/dev/null || echo "NO_GIT_REMOTE"
+cat .clickup 2>/dev/null || echo "NO_CLICKUP"
+ls .linear 2>/dev/null || echo "NO_LINEAR"
+# Check for MCP config (ClickUp/Linear MCP presence)
+cat .claude/settings.json 2>/dev/null | grep -i "clickup\|linear\|jira" || true
 
 # Project structure (top-level only)
 tree -L 2 --gitignore 2>/dev/null || find . -maxdepth 2 -not -path './.git/*' -not -path './node_modules/*' -not -path './.next/*' | sort
@@ -114,16 +123,43 @@ Analyze the inventory to produce a detection JSON. Use this decision tree — fi
 | `capacitor.config.ts` | `capacitor` |
 | `app.json` with `"expo"` key | `expo` |
 
+### VCS Platform
+| Detection | Result |
+|-----------|--------|
+| `.github/workflows/` exists OR `git remote` URL contains `github.com` | `github` |
+| `.gitlab-ci.yml` exists OR `git remote` URL contains `gitlab.` | `gitlab` |
+| `git remote` URL contains `bitbucket.org` | `bitbucket` |
+| No git remote or no match | `none` |
+
+### Issue Tracker
+| Detection | Result |
+|-----------|--------|
+| VCS is `github` AND `.github/` present | `github-issues` |
+| VCS is `gitlab` | `gitlab-issues` |
+| `clickup` found in MCP config OR `.clickup` file | `clickup` |
+| `linear` found in MCP config OR `.linear` file | `linear` |
+| `jira` found in MCP config | `jira` |
+| Fallback | `none` |
+
+Store both as `vcs_platform` and `issue_tracker` in the detection JSON. These values are used in Phase 5 to customize the CLAUDE.md agent table and commands section.
+
+**Existing project fallback**: If `issue_tracker` resolves to `none` after all detection signals, ask the user once:
+> "I couldn't auto-detect your issue tracker. Which one does this project use?
+> GitHub Issues / GitLab Issues / Linear / ClickUp / Jira / None"
+Do NOT ask if `vcs_platform` already implies the tracker (e.g. `gitlab` → `gitlab-issues`).
+
 ### Ambiguous / Large Codebase Fallback
 If the framework is not detectable from manifest files, use Gemini:
 ```bash
-gemini -p "@./ Identify the web framework, ORM/database layer, test runner, E2E tool, and mobile platform used in this project. Respond in exactly this format:
+gemini -p "@./ Identify the web framework, ORM/database layer, test runner, E2E tool, mobile platform, VCS host, and issue tracker used in this project. Respond in exactly this format:
 FRAMEWORK: <name>
 ORM: <name or none>
 TEST_RUNNER: <name or none>
 E2E: <name or none>
 MOBILE: <name or none>
-PACKAGE_MANAGER: <name>"
+PACKAGE_MANAGER: <name>
+VCS_PLATFORM: <github|gitlab|bitbucket|none>
+ISSUE_TRACKER: <github-issues|gitlab-issues|linear|clickup|jira|none>"
 ```
 
 ---
@@ -192,6 +228,14 @@ Ask these questions sequentially using the AskUserQuestion tool. Wait for each a
 - Unit tests only
 - Minimal (lint + build only)
 
+**Q11**: Where will you track issues and tasks?
+- GitHub Issues (default, works with `/dev` and `/pm:*` out of the box)
+- GitLab Issues
+- Linear
+- ClickUp
+- Jira
+- No issue tracker / other
+
 Build the stack map from answers. For "Undecided — recommend for me" answers, apply these defaults:
 - TypeScript + small/medium scale + web → Next.js + Prisma + PostgreSQL
 - TypeScript + API-only → Fastify + Drizzle
@@ -242,9 +286,21 @@ Files to update:
 
 **Content to populate:**
 - Project name from `package.json` `name` field (or ask for new projects)
-- Stack summary
+- Stack summary (substitute `<!-- FRAMEWORK -->`, `<!-- ORM -->`, etc.)
 - Dev commands table (extracted from `package.json` `scripts` or language conventions)
 - Validation gate commands
+- `<!-- VCS_PLATFORM -->` → detected `vcs_platform` (e.g. `GitLab`, `GitHub`, `Bitbucket`, `none`)
+- `<!-- ISSUE_TRACKER -->` → detected `issue_tracker` (e.g. `GitHub Issues`, `GitLab Issues`, `ClickUp`, `Linear`, `Jira`, `none`)
+
+**Tracker-aware commands note:** If `issue_tracker` is NOT `github-issues`, add a notice block after the Agent System table:
+
+```markdown
+> **Note**: This project uses <!-- ISSUE_TRACKER --> for issue tracking. The `/dev` and `/pm:*` commands
+> will read issue context from that tracker rather than GitHub Issues. Ensure the relevant MCP server
+> or CLI tool is configured (see `.claude/settings.json`).
+```
+
+Skip the notice block if `issue_tracker` is `github-issues` or `none`.
 
 ### 5c. Generate CLAUDE.local.md.example
 
@@ -333,6 +389,8 @@ Read existing settings.json. Preserve the `hooks` section verbatim. Replace only
 | Test runner | Jest |
 | E2E | Playwright |
 | Mobile | Capacitor |
+| VCS | GitHub |
+| Issue tracker | GitHub Issues |
 
 ### Files Generated/Updated
 - `.claude/agents/dev-backend.md` — Next.js + Prisma patterns

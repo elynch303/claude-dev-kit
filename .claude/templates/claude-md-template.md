@@ -15,6 +15,8 @@
 | Test runner | <!-- TEST_RUNNER --> |
 | E2E | <!-- E2E_RUNNER --> |
 | Mobile | <!-- MOBILE --> |
+| VCS | <!-- VCS_PLATFORM --> |
+| Issue tracker | <!-- ISSUE_TRACKER --> |
 
 ## Development Commands
 | Task | Command |
@@ -51,12 +53,14 @@ This project uses the claude-dev-kit autonomous development pipeline:
 | Command | Purpose |
 |---------|---------|
 | `/init` | Re-run to refresh agents after stack changes |
-| `/pm:groom` | Groom GitHub issues with acceptance criteria |
+| `/pm:groom` | Groom <!-- ISSUE_TRACKER --> issues with acceptance criteria |
 | `/pm:size` | Size stories for sprint planning |
 | `/pm:plan-epic` | Full epic plan: groom → size → PRPs |
 | `/dev <issue>` | Autonomous implementation: code → tests → review → PR |
 | `/dev:review` | Code review of current branch |
 | `/bs:brainstorm_full` | Multi-LLM brainstorming |
+
+> **Issue tracker**: <!-- ISSUE_TRACKER --> — `/pm:groom` and `/dev` read issues from here.
 
 <!-- CDK:GENERATED:END -->
 
