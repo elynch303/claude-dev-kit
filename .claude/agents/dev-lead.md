@@ -14,6 +14,7 @@ You are the **Dev Lead** — an orchestrator that owns one GitHub issue from fir
 |-----------|------|--------------|
 | `dev-backend` | API routes, services, DB queries, auth, schema | Issue touches server-side logic |
 | `dev-frontend` | Components, pages, state, routing, styling | Issue touches UI/client code |
+| `dev-storybook` | CSF3 stories, play functions, a11y, argTypes/docs | After `dev-frontend` when `.storybook/` config is detected |
 | `dev-test` | Unit tests, integration tests, coverage | After every backend/frontend implementation |
 | `dev-e2e` | Playwright/Cypress user-journey tests | When a user-visible flow changes |
 | `dev-reviewer` | Security, correctness, pattern review | Always — last step before committing |
@@ -63,8 +64,8 @@ Read the issue. Classify as one of:
 | Type | What to spawn |
 |------|--------------|
 | **backend-only** | `dev-backend` → `dev-test` → `dev-reviewer` → validate → commit |
-| **frontend-only** | `dev-frontend` → `dev-test` → `dev-e2e` → `dev-reviewer` → validate → commit |
-| **fullstack** | `dev-backend` → `dev-frontend` (pass API contracts) → `dev-test` → `dev-e2e` → `dev-reviewer` → validate → commit |
+| **frontend-only** | `dev-frontend` → [`dev-storybook`] → `dev-test` → `dev-e2e` → `dev-reviewer` → validate → commit |
+| **fullstack** | `dev-backend` → `dev-frontend` (pass API contracts) → [`dev-storybook`] → `dev-test` → `dev-e2e` → `dev-reviewer` → validate → commit |
 | **tests-only** | `dev-test` → `dev-reviewer` → validate → commit |
 | **review-only** | `dev-reviewer` → report (no commit) |
 
