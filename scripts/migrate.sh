@@ -48,6 +48,19 @@ make_temp_file() {
   mktemp "${TMPDIR:-/tmp}/cdk-temp.XXXXXX"
 }
 
+extract_cdk_block() {
+  local source_file="$1"
+  local output_file="$2"
+  local start_marker="$3"
+  local end_marker="$4"
+
+  awk -v start="<!-- ${start_marker}" -v end="<!-- ${end_marker} -->" '
+    index($0, start) > 0 { in_block=1 }
+    in_block { print }
+    index($0, end) > 0 { in_block=0 }
+  ' "$source_file" > "$output_file"
+}
+
 CI_MODE="${CI:-false}"
 
 # ─── Section 1: Load existing manifest ────────────────────────────────────────
@@ -381,38 +394,44 @@ merge_claude_md() {
   if grep -qF "$START_MARKER" "$tgt_md" 2>/dev/null; then
     # Has CDK markers — replace only the block between markers (inclusive)
     local tmp
-    tmp=$(make_temp_file)
-    # shellcheck disable=SC2064
-    trap "rm -f '$tmp'" RETURN
-
-    # Extract CDK block from template
     local cdk_block
-    cdk_block=$(awk "/<!-- ${START_MARKER}/,/<!-- ${END_MARKER} -->/" "$cdk_template")
+    local before_block
+    local after_block
+    tmp=$(make_temp_file)
+    cdk_block=$(make_temp_file)
+    before_block=$(make_temp_file)
+    after_block=$(make_temp_file)
+    # shellcheck disable=SC2064
+    trap "rm -f '$tmp' '$cdk_block' '$before_block' '$after_block'" RETURN
 
-    # Build merged file: content before START + cdk block + content after END
-    awk -v block="$cdk_block" \
-      -v start="$START_MARKER" \
-      -v end="$END_MARKER" \
-      'BEGIN { in_block=0; printed=0 }
-       index($0, start) > 0 {
-         if (!printed) { print block; printed=1 }
-         in_block=1; next
-       }
-       in_block && index($0, end) > 0 { in_block=0; next }
-       !in_block { print }
-      ' "$tgt_md" > "$tmp"
+    extract_cdk_block "$cdk_template" "$cdk_block" "$START_MARKER" "$END_MARKER"
+
+    awk -v start="$START_MARKER" '
+      index($0, start) > 0 { exit }
+      { print }
+    ' "$tgt_md" > "$before_block"
+
+    awk -v end="$END_MARKER" '
+      found_end { print; next }
+      index($0, end) > 0 { found_end=1 }
+    ' "$tgt_md" > "$after_block"
+
+    cat "$before_block" "$cdk_block" "$after_block" > "$tmp"
 
     cp "$tmp" "$tgt_md"
     success "CLAUDE.md: CDK block updated (your custom content preserved)"
   else
     # No CDK markers — append the CDK block at the end
     local cdk_block
-    cdk_block=$(awk "/<!-- ${START_MARKER}/,/<!-- ${END_MARKER} -->/" "$cdk_template")
+    cdk_block=$(make_temp_file)
+    # shellcheck disable=SC2064
+    trap "rm -f '$cdk_block'" RETURN
+    extract_cdk_block "$cdk_template" "$cdk_block" "$START_MARKER" "$END_MARKER"
     {
       echo ""
       echo "---"
       echo ""
-      printf '%s\n' "$cdk_block"
+      cat "$cdk_block"
     } >> "$tgt_md"
     success "CLAUDE.md: CDK block appended (your existing content preserved)"
     info    "Tip: you can move the appended block anywhere in the file — the markers let future migrations update it in place"
