@@ -1,0 +1,27 @@
+name: Installer Smoke Test
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+
+jobs:
+  installer-smoke:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Run installer smoke test
+        run: bash scripts/test-installer-smoke.sh

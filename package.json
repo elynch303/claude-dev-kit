@@ -5,6 +5,9 @@
   "bin": {
     "claude-dev-kit": "./bin/claude-dev-kit.js"
   },
+  "scripts": {
+    "test:installer": "bash scripts/test-installer-smoke.sh"
+  },
   "files": [
     "bin/",
     ".claude/agents/",

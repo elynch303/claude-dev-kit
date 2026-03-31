@@ -315,6 +315,10 @@ merge_settings() {
   local merge_script="$KIT_ROOT/scripts/lib/merge-settings.js"
 
   if [[ ! -f "$cdk_settings" ]]; then
+    cdk_settings="$CDK_CLAUDE/settings.json.example"
+  fi
+
+  if [[ ! -f "$cdk_settings" ]]; then
     warn "settings.json: CDK source not found — skipping"
     return
   fi

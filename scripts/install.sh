@@ -101,10 +101,14 @@ mcp_add() {
 # ─── Main ─────────────────────────────────────────────────────────────────────
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 KIT_ROOT="$(dirname "$SCRIPT_DIR")"
-TARGET="${1:-${TARGET:-$(pwd)}}"
 MCP_ONLY=false
 
-[[ "${1:-}" == "--mcp-only" ]] && MCP_ONLY=true && TARGET="${TARGET:-$(pwd)}"
+if [[ "${1:-}" == "--mcp-only" ]]; then
+  MCP_ONLY=true
+  TARGET="${TARGET:-$(pwd)}"
+else
+  TARGET="${1:-${TARGET:-$(pwd)}}"
+fi
 
 # Install log — all subprocess output goes here instead of being suppressed
 LOG_FILE="$TARGET/.claude/install.log"
@@ -198,7 +202,10 @@ header "Phase 2: Configure Claude MCP integrations"
 echo -e "  ${DIM}MCPs extend Claude with tools for your Git platform, ticket system, and design tools.${NC}"
 echo ""
 
-if ! command -v claude &>/dev/null; then
+if [[ "${CI:-}" == "true" ]]; then
+  info "CI mode detected — skipping MCP setup"
+  echo ""
+elif ! command -v claude &>/dev/null; then
   warn "Claude CLI not found — cannot configure MCPs."
   info  "Install the Claude CLI: https://claude.ai/code"
   info  "Then re-run: bash $0 --mcp-only"
@@ -438,7 +445,7 @@ echo -e "  2. ${CYAN}Update CLAUDE.md${NC} with your project's stack and convent
 echo -e "     ${DIM}(Or run /init in Claude Code to auto-generate it)${NC}"
 echo ""
 echo -e "  3. ${CYAN}Add tool permissions${NC} to .claude/settings.json for your build commands:"
-echo -e '     ${DIM}e.g. "Bash(npm run:*)", "Bash(pytest:*)", "Bash(cargo:*)"${NC}'
+echo -e "     ${DIM}e.g. \"Bash(npm run:*)\", \"Bash(pytest:*)\", \"Bash(cargo:*)\"${NC}"
 echo ""
 echo -e "  4. ${CYAN}Open Claude Code${NC} in your project and run:"
 echo -e "     ${BOLD}/init${NC}          — auto-detect stack and configure agents"
