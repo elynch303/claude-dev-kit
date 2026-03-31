@@ -45,7 +45,6 @@ dim()     { echo -e "${DIM}$*${NC}"; }
 CI_MODE="${CI:-false}"
 
 # ─── Section 1: Load existing manifest ────────────────────────────────────────
-declare -A manifest_set
 IS_FIRST_INSTALL=false
 
 mkdir -p "$TGT_CLAUDE"
@@ -54,7 +53,6 @@ if [[ -f "$MANIFEST" ]]; then
   while IFS= read -r line; do
     [[ "$line" =~ ^# ]] && continue
     [[ -z "$line" ]] && continue
-    manifest_set["$line"]=1
   done < "$MANIFEST"
 else
   IS_FIRST_INSTALL=true
@@ -175,14 +173,41 @@ if [[ "$CI_MODE" != "true" && ${#cat_modified[@]} -eq 0 ]]; then
 fi
 
 # ─── Section 6: Resolve MODIFIED files interactively ──────────────────────────
-declare -A resolutions
+declare -a resolution_files=()
+declare -a resolution_actions=()
+
+set_resolution() {
+  local file="$1"
+  local action="$2"
+  local i
+  for (( i=0; i<${#resolution_files[@]}; i++ )); do
+    if [[ "${resolution_files[$i]}" == "$file" ]]; then
+      resolution_actions[$i]="$action"
+      return
+    fi
+  done
+  resolution_files+=("$file")
+  resolution_actions+=("$action")
+}
+
+get_resolution() {
+  local file="$1"
+  local i
+  for (( i=0; i<${#resolution_files[@]}; i++ )); do
+    if [[ "${resolution_files[$i]}" == "$file" ]]; then
+      printf '%s\n' "${resolution_actions[$i]}"
+      return
+    fi
+  done
+  printf 'keep\n'
+}
 
 if [[ ${#cat_modified[@]} -gt 0 ]]; then
   if [[ "$CI_MODE" == "true" ]]; then
     warn "CI mode — all ${#cat_modified[@]} modified file(s) will be preserved (keeping your versions)"
     warn "To update them: run scripts/migrate.sh manually and choose [u] for each"
     for rel in "${cat_modified[@]}"; do
-      resolutions["$rel"]="keep"
+      set_resolution "$rel" "keep"
     done
   else
     header "Resolving modified files"
@@ -202,12 +227,12 @@ if [[ ${#cat_modified[@]} -gt 0 ]]; then
 
         case "$choice" in
           k|K)
-            resolutions["$rel"]="keep"
+            set_resolution "$rel" "keep"
             info "Keeping your version"
             break
             ;;
           u|U)
-            resolutions["$rel"]="cdk"
+            set_resolution "$rel" "cdk"
             info "Will use CDK version"
             break
             ;;
@@ -264,7 +289,7 @@ done
 
 # Apply MODIFIED based on user decisions
 for rel in "${cat_modified[@]}"; do
-  case "${resolutions[$rel]:-keep}" in
+  case "$(get_resolution "$rel")" in
     cdk)
       mkdir -p "$(dirname "$TGT_CLAUDE/$rel")"
       cp "$CDK_CLAUDE/$rel" "$TGT_CLAUDE/$rel"
