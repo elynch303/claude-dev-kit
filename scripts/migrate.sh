@@ -10,7 +10,9 @@
 #
 # Safe to run standalone. Exit codes: 0 = success, 1 = aborted/error.
 
-set -euo pipefail
+# Bash 3.x treats empty arrays as unbound under `set -u`, which breaks
+# migration on stock macOS shells. Keep `-e` and `pipefail`, but avoid `-u`.
+set -eo pipefail
 
 # ─── Args ─────────────────────────────────────────────────────────────────────
 KIT_ROOT="${1:-}"
