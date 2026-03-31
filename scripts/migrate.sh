@@ -44,6 +44,10 @@ error()   { echo -e "${RED}  ✗${NC} $*" >&2; }
 header()  { echo -e "\n${BOLD}$*${NC}"; }
 dim()     { echo -e "${DIM}$*${NC}"; }
 
+make_temp_file() {
+  mktemp "${TMPDIR:-/tmp}/cdk-temp.XXXXXX"
+}
+
 CI_MODE="${CI:-false}"
 
 # ─── Section 1: Load existing manifest ────────────────────────────────────────
@@ -335,7 +339,7 @@ merge_settings() {
   fi
 
   local tmp
-  tmp=$(mktemp /tmp/cdk-settings-XXXXXX.json)
+  tmp=$(make_temp_file)
   # shellcheck disable=SC2064
   trap "rm -f '$tmp'" RETURN
 
@@ -377,7 +381,7 @@ merge_claude_md() {
   if grep -qF "$START_MARKER" "$tgt_md" 2>/dev/null; then
     # Has CDK markers — replace only the block between markers (inclusive)
     local tmp
-    tmp=$(mktemp /tmp/cdk-claude-md-XXXXXX.md)
+    tmp=$(make_temp_file)
     # shellcheck disable=SC2064
     trap "rm -f '$tmp'" RETURN
 
