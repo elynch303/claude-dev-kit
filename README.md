@@ -21,6 +21,10 @@ YOU
       └── dev-lead [opus] ──────────── orchestrates implementation
            ├── dev-backend  [sonnet]  ← API routes, services, DB, auth
            ├── dev-frontend [sonnet]  ← components, pages, state, styling
+           ├── dev-storybook[sonnet]  ← CSF3 stories, play tests, a11y, docs (optional)
+           │    ├── dev-storybook-play [sonnet]  ← play/interaction functions
+           │    ├── dev-storybook-a11y [sonnet]  ← WCAG A/AA auditing
+           │    └── dev-storybook-docs [sonnet]  ← argTypes, controls, prop docs
            ├── dev-test     [sonnet]  ← unit tests, mocks, coverage
            ├── dev-e2e      [sonnet]  ← Playwright/Cypress user journeys
            └── dev-reviewer [sonnet]  ← security, correctness, pattern review
@@ -69,6 +73,7 @@ dev-lead
  ├── [fullstack path]
  │   ├── dev-backend:  implements API routes + service layer
  │   ├── dev-frontend: implements UI (receives API contracts from backend)
+ │   ├── dev-storybook: writes CSF3 stories + coordinates play/a11y/docs (when Storybook detected)
  │   ├── dev-test:     writes unit tests (90%+ branch coverage)
  │   ├── dev-e2e:      writes Playwright tests for user journeys
  │   └── dev-reviewer: structured PASS/FAIL review (security, correctness, types)
@@ -243,6 +248,7 @@ Reads the project structure and CLAUDE.md, so Claude understands the project bef
 | `/dev-epic` | All stories in highest-priority epic → one PR |
 | `/dev:backend <task>` | Backend work only |
 | `/dev:frontend <task>` | Frontend work only |
+| `/dev:storybook [component \| issue \| "audit"]` | Write or audit Storybook stories — skips if Storybook not detected |
 | `/dev:test <files>` | Write tests for specific files |
 | `/dev:e2e <flow>` | Write E2E tests for a flow |
 | `/dev:review` | Code review of current branch |
