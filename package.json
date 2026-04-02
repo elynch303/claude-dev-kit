@@ -1,6 +1,6 @@
 {
   "name": "claude-dev-kit",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "Transform Claude Code into a fully autonomous development team — orchestrated sub-agents for planning, implementation, testing, and review.",
   "bin": {
     "claude-dev-kit": "./bin/claude-dev-kit.js"
