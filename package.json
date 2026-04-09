@@ -19,6 +19,7 @@
     ".claude/templates/",
     "CLAUDE.local.md.example",
     "scripts/install.sh",
+    "scripts/install.ps1",
     "scripts/migrate.sh",
     "scripts/lib/"
   ],

@@ -342,8 +342,9 @@ merge_settings() {
 
   if [[ ! -f "$tgt_settings" ]]; then
     # No existing settings — install CDK's (strip internal comment keys)
-    node -e "
-      const s = JSON.parse(require('fs').readFileSync('$cdk_settings', 'utf8'));
+    # Pass path via env var to avoid Windows Git Bash path translation issues
+    CDK_SETTINGS_PATH="$cdk_settings" node -e "
+      const s = JSON.parse(require('fs').readFileSync(process.env.CDK_SETTINGS_PATH, 'utf8'));
       delete s._comment; delete s._hooks_note;
       process.stdout.write(JSON.stringify(s, null, 2) + '\n');
     " > "$tgt_settings"
@@ -358,7 +359,7 @@ merge_settings() {
 
   if node "$merge_script" "$tgt_settings" "$cdk_settings" > "$tmp" 2>&1; then
     # Validate output is parseable JSON before overwriting
-    if node -e "JSON.parse(require('fs').readFileSync('$tmp', 'utf8'))" 2>/dev/null; then
+    if CDK_TMP_PATH="$tmp" node -e "JSON.parse(require('fs').readFileSync(process.env.CDK_TMP_PATH, 'utf8'))" 2>/dev/null; then
       cp "$tmp" "$tgt_settings"
       success "settings.json: merged (permissions + hooks updated)"
     else
