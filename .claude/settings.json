@@ -50,7 +50,8 @@
             "type": "command",
             "command": "node .claude/hooks/pre-tool-use/block-dangerous-commands.js"
           }
-        ]
+        ],
+        "matcher": "Bash"
       }
     ],
     "Stop": [
