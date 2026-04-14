@@ -253,6 +253,11 @@ Reads the project structure and CLAUDE.md, so Claude understands the project bef
 | `/dev:e2e <flow>` | Write E2E tests for a flow |
 | `/dev:review` | Code review of current branch |
 | `/fix-github-issue <N>` | Quick fix: read → implement → PR |
+| `/design <file-key> <slug>` | Full design pipeline — wireframe → Figma frames → review *(requires Figma MCP)* |
+| `/design:mockup <file-key> <slug>` | Wireframe + Figma frame creation *(requires Figma MCP)* |
+| `/design:review <file-key> <slug>` | Compare Figma vs code — PASS/FAIL deviations *(requires Figma MCP)* |
+| `/design:tokens <file-key>` | Sync Figma variables ↔ code design tokens *(requires Figma MCP)* |
+| `/design:component <file-key> <name>` | Design a single component end-to-end *(requires Figma MCP)* |
 
 ### Multi-AI Management
 | Command | What it does |
@@ -303,6 +308,30 @@ Reads the project structure and CLAUDE.md, so Claude understands the project bef
 | `documentation-manager` | sonnet | Docs sync after code changes |
 | `validation-gates` | sonnet | Quality gate runner (standalone use) |
 | `haiku-executor` | haiku | Fast one-shot tasks |
+
+### Designer Agent Hierarchy *(optional — requires Figma MCP)*
+
+| Agent | Model | Role |
+|-------|-------|------|
+| `designer` | opus | Design orchestrator — classifies work, spawns sub-agents, validates outputs |
+| `design-researcher` | sonnet | Reads Figma file structure, component library, tokens via MCP |
+| `design-wireframer` | sonnet | ASCII wireframe spec + Figma node blueprint JSON |
+| `design-system-manager` | sonnet | Creates frames, variables, components via Figma REST API |
+| `design-reviewer` | sonnet | Read-only comparison of Figma frames vs code implementation |
+
+---
+
+## Optional Agents
+
+Some agent packs require additional MCPs or external tooling. They ship dormant in the kit and activate only when their dependencies are configured.
+
+| Pack | Requirement | How to activate |
+|------|-------------|------------------|
+| **Designer** (`designer` + 4 sub-agents) | Figma MCP | Run `bash scripts/install.sh --mcp-only` and select **Figma** under Design Tools. Or select the **Designer** pack in Phase 1.5 during a fresh install — the installer will auto-prompt for your Figma token. |
+| **DevOps** *(planned)* | — | Future release. |
+| **Data** *(planned)* | — | Future release. |
+
+Every design command performs a runtime guard: if `claude mcp list` does not show `figma`, the command exits with instructions to run the MCP installer. This keeps the kit safe to ship with optional agents enabled by default.
 
 ---
 

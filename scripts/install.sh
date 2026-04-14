@@ -196,6 +196,93 @@ EOF
 
 fi
 
+# ─── Phase 1.5: Agent Pack Selection ──────────────────────────────────────────
+# Optional agent packs extend the kit with specialist agents for specific domains.
+# Some packs require additional MCPs (e.g. Designer requires the Figma MCP).
+
+DESIGNER_PACK_SELECTED=false
+
+if [[ "$MCP_ONLY" == "false" && "${CI:-}" != "true" ]]; then
+  echo ""
+  header "Phase 1.5: Optional agent packs"
+  echo -e "  ${DIM}Agent packs add specialist agents for a domain. You can skip now and add later.${NC}"
+  echo ""
+
+  multi_menu AGENT_PACKS "Which agent packs do you want to enable? (select all that apply)" \
+    "Designer — Figma integration, wireframing, design tokens (requires Figma MCP)" \
+    "DevOps — deployment, infrastructure, CI/CD agents" \
+    "Data — analytics, reporting, data pipeline agents" \
+    "All of the above" \
+    "Unsure — analyze my project and recommend" \
+    "None / skip for now"
+
+  # Expand "All" selection
+  for pack in "${AGENT_PACKS[@]}"; do
+    if [[ "$pack" == "All of the above" ]]; then
+      AGENT_PACKS=(
+        "Designer — Figma integration, wireframing, design tokens (requires Figma MCP)"
+        "DevOps — deployment, infrastructure, CI/CD agents"
+        "Data — analytics, reporting, data pipeline agents"
+      )
+      break
+    fi
+  done
+
+  # Handle "Unsure — analyze my project"
+  for pack in "${AGENT_PACKS[@]}"; do
+    if [[ "$pack" == "Unsure"* ]]; then
+      echo ""
+      info "Analyzing project to recommend agent packs..."
+      ANALYSIS=""
+      if command -v gemini &>/dev/null; then
+        ANALYSIS=$(gemini -p "@./ What is this project building? Based on the codebase, which of these agent packs would be most useful: Designer (requires Figma), Mobile (Capacitor/Expo), Data/Analytics, DevOps/Infrastructure? Respond in 2-3 sentences." 2>/dev/null || cat "$TARGET/package.json" 2>/dev/null | head -20)
+      else
+        ANALYSIS=$(cat "$TARGET/package.json" 2>/dev/null | head -20)
+      fi
+      if [[ -n "$ANALYSIS" ]]; then
+        echo -e "  ${DIM}${ANALYSIS}${NC}"
+        echo ""
+      else
+        warn "Could not analyze project (no gemini CLI and no package.json)."
+      fi
+      echo ""
+      multi_menu AGENT_PACKS "Based on the above, which packs do you want? (select all that apply)" \
+        "Designer — Figma integration, wireframing, design tokens (requires Figma MCP)" \
+        "DevOps — deployment, infrastructure, CI/CD agents" \
+        "Data — analytics, reporting, data pipeline agents" \
+        "None / skip for now"
+      break
+    fi
+  done
+
+  # Process final selections
+  if [[ ${#AGENT_PACKS[@]} -eq 0 ]]; then
+    info "No agent packs selected. You can enable packs later by re-running the installer."
+  else
+    for pack in "${AGENT_PACKS[@]}"; do
+      case "$pack" in
+        "Designer"*)
+          success "Designer pack enabled — will auto-prompt for Figma MCP in Phase 2"
+          DESIGNER_PACK_SELECTED=true
+          ;;
+        "DevOps"*)
+          info "DevOps pack noted — agents will be added in a future release. No action taken now."
+          ;;
+        "Data"*)
+          info "Data pack noted — agents will be added in a future release. No action taken now."
+          ;;
+        "None"*)
+          info "Skipping agent packs. You can enable them later by re-running the installer."
+          ;;
+      esac
+    done
+  fi
+
+  # Remind about unselected packs
+  echo ""
+  dim "  Packs not selected now can always be added later by re-running this installer."
+fi
+
 # ─── Phase 2: MCP Wizard ──────────────────────────────────────────────────────
 echo ""
 header "Phase 2: Configure Claude MCP integrations"
@@ -357,10 +444,15 @@ else
   # ── 2c. Design Tools ─────────────────────────────────────────────────────────
   echo ""
   header "Design Tools"
-  multi_menu DESIGN_TOOLS "Which design tools do you use? (select all that apply)" \
-    "Figma" \
-    "Storybook (component library)" \
-    "None"
+  if [[ "$DESIGNER_PACK_SELECTED" == "true" ]]; then
+    info "Designer agent pack was selected — auto-including Figma in Design Tools."
+    DESIGN_TOOLS=("Figma")
+  else
+    multi_menu DESIGN_TOOLS "Which design tools do you use? (select all that apply)" \
+      "Figma" \
+      "Storybook (component library)" \
+      "None"
+  fi
 
   for tool in "${DESIGN_TOOLS[@]}"; do
     case "$tool" in
@@ -378,6 +470,7 @@ else
           mcp_add "Figma" --scope project figma \
             npx -y figma-developer-mcp \
             --env FIGMA_API_KEY="$FIGMA_TOKEN"
+          success "Figma MCP installed — this activates the designer agent hierarchy (designer, design-researcher, design-wireframer, design-system-manager, design-reviewer)"
         fi
         ;;
       "Storybook"*)
