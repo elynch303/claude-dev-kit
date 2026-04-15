@@ -1,6 +1,16 @@
 {
-  "_comment": "Copy this file to settings.json. It is gitignored — each developer configures their own.",
+  "_comment": "Copy this file to settings.json. It is gitignored \u2014 each developer configures their own.",
   "_hooks_note": "The hooks block below is the CDK default. If you have an existing settings.json, merge this hooks section into it.",
+  "_stopGates_note": "Validation gates run by .claude/hooks/stop/validation_gates.py. Required gates on by default; tests/e2e/ui opt-in. Toggle per-project.",
+  "stopGates": {
+    "lint": true,
+    "security": true,
+    "typecheck": true,
+    "build": true,
+    "tests": false,
+    "e2e": false,
+    "ui": false
+  },
   "permissions": {
     "allow": [
       "Read",
@@ -63,6 +73,10 @@
           {
             "type": "command",
             "command": "python .claude/hooks/stop/learning_logger.py"
+          },
+          {
+            "type": "command",
+            "command": "python .claude/hooks/stop/validation_gates.py"
           }
         ]
       }

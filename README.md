@@ -477,6 +477,7 @@ Run monthly or after major feature additions.
 | **Block Dangerous Commands** | Intercepts Bash calls — blocks rm ~, force push main, git reset --hard, .env reads, etc. (configurable: critical/high/strict) |
 | **Context Monitor** | Warns at 65% context, stops at 85% — instructs to `/clear` |
 | **Learning Logger** | Captures session data after each session for self-improvement analysis |
+| **Validation Gates** | Runs lint, security, typecheck, and build checks on session end — surfaces failures to Claude so it can fix before finishing. Configure per-gate via `stopGates` in `settings.json`. Optional gates (tests, e2e, ui) are off by default. |
 | **Skill Suggester** | Watches your prompts — surfaces the right skill at the right time |
 
 ---
