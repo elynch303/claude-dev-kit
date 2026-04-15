@@ -194,6 +194,12 @@ EOF
     success "Hook dependencies installed"
   fi
 
+  # ── Validation gates hook note ────────────────────────────────────────────────
+  info "Validation gates hook available (.claude/hooks/stop/validation_gates.py)"
+  dim "  Auto-runs lint, security, typecheck, and build checks on session end."
+  dim "  Already registered in settings.json.example — copy that file to enable."
+  dim "  Configure per-gate: edit 'stopGates' in .claude/settings.json"
+
 fi
 
 # ─── Phase 1.5: Agent Pack Selection ──────────────────────────────────────────
