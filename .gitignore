@@ -11,3 +11,7 @@ __pycache__/
 
 # Personal Claude overrides — machine-local, never shared with teammates.
 CLAUDE.local.md
+
+# Tool-generated index files
+entities.json
+mempalace.yaml
