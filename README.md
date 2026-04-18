@@ -120,9 +120,9 @@ Every implementation ends with `dev-reviewer` checking:
 ```bash
 # No clone needed — run directly with bunx or npx:
 cd /path/to/your/project
-bunx claude-dev-kit@latest
+bunx claude-dev-kit@latest install
 # or
-npx claude-dev-kit@latest
+npx claude-dev-kit@latest install
 ```
 
 Or if you prefer to clone first:
@@ -130,6 +130,27 @@ Or if you prefer to clone first:
 ```bash
 git clone https://github.com/evandempsey/claude-dev-kit /tmp/cdk
 bash /tmp/cdk/scripts/install.sh /path/to/your/project
+```
+
+### CLI subcommands
+
+| Command | Description |
+|---------|-------------|
+| `claude-dev-kit install [target]` | Full install: copy `.claude/`, hook deps, MCP wizard (default) |
+| `claude-dev-kit update [target]` | Migration only — pull new agents/skills/hooks, no prompts |
+| `claude-dev-kit mcp [target]` | Run MCP wizard only (add integrations to existing project) |
+| `claude-dev-kit version` | Print installed kit version |
+| `claude-dev-kit help` | Print usage summary |
+
+```bash
+# Update an existing install non-interactively (e.g. in CI)
+bunx claude-dev-kit@latest update
+
+# Add/reconfigure MCP integrations only
+bunx claude-dev-kit@latest mcp
+
+# Run fully non-interactively (skips all prompts)
+CI=true bunx claude-dev-kit@latest install
 ```
 
 ### What the installer does
@@ -176,8 +197,8 @@ All MCPs are installed with `--scope project` — they activate only in this pro
 ### MCP-only install (add integrations to existing project)
 
 ```bash
-bunx claude-dev-kit@latest --mcp-only
-# or
+bunx claude-dev-kit@latest mcp
+# or (legacy flag still works)
 bash /path/to/install.sh --mcp-only
 ```
 
@@ -327,7 +348,7 @@ Some agent packs require additional MCPs or external tooling. They ship dormant 
 
 | Pack | Requirement | How to activate |
 |------|-------------|------------------|
-| **Designer** (`designer` + 4 sub-agents) | Figma MCP | Run `bash scripts/install.sh --mcp-only` and select **Figma** under Design Tools. Or select the **Designer** pack in Phase 1.5 during a fresh install — the installer will auto-prompt for your Figma token. |
+| **Designer** (`designer` + 4 sub-agents) | Figma MCP | Run `bunx claude-dev-kit@latest mcp` and select **Figma** under Design Tools. Or select the **Designer** pack in Phase 1.5 during a fresh install — the installer will auto-prompt for your Figma token. |
 | **DevOps** *(planned)* | — | Future release. |
 | **Data** *(planned)* | — | Future release. |
 
