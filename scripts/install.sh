@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
-# Claude Dev Kit — Installer v2.1
+# Claude Dev Kit — Installer v2.2
 #
 # Copies .claude/ into your project, installs hook deps,
 # then runs an MCP wizard to configure Claude's integrations
 # (Git platform, ticket system, design tools, code search).
 #
 # Usage:
-#   bash install.sh [target-directory]
+#   bash install.sh [--phase=install|update|mcp] [target-directory]
 #   TARGET=/path/to/project bash install.sh
-#   bash install.sh --mcp-only    (skip file copy, just configure MCPs)
+#   bash install.sh --mcp-only    (alias for --phase=mcp)
 
 set -euo pipefail
 
@@ -101,14 +101,26 @@ mcp_add() {
 # ─── Main ─────────────────────────────────────────────────────────────────────
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 KIT_ROOT="$(dirname "$SCRIPT_DIR")"
-MCP_ONLY=false
 
-if [[ "${1:-}" == "--mcp-only" ]]; then
-  MCP_ONLY=true
-  TARGET="${TARGET:-$(pwd)}"
-else
-  TARGET="${1:-${TARGET:-$(pwd)}}"
-fi
+# ── Arg parsing: --phase=install|update|mcp, --mcp-only (legacy alias) ───────
+PHASE="install"
+POSITIONAL_ARGS=()
+
+for arg in "$@"; do
+  case "$arg" in
+    --phase=install) PHASE="install" ;;
+    --phase=update)  PHASE="update"  ;;
+    --phase=mcp)     PHASE="mcp"     ;;
+    --mcp-only)      PHASE="mcp"     ;;  # backward-compat alias
+    *) POSITIONAL_ARGS+=("$arg")     ;;
+  esac
+done
+
+TARGET="${POSITIONAL_ARGS[0]:-${TARGET:-$(pwd)}}"
+
+# Derive legacy MCP_ONLY for sections that still check it
+MCP_ONLY=false
+[[ "$PHASE" == "mcp" ]] && MCP_ONLY=true
 
 # Install log — all subprocess output goes here instead of being suppressed
 LOG_FILE="$TARGET/.claude/install.log"
@@ -118,6 +130,51 @@ echo -e "${BOLD}╔════════════════════�
 echo -e "${BOLD}║       Claude Dev Kit — Installer      ║${NC}"
 echo -e "${BOLD}╚═══════════════════════════════════════╝${NC}"
 echo ""
+
+# ─── Phase: update (migration only, non-interactive) ─────────────────────────
+if [[ "$PHASE" == "update" ]]; then
+  header "Update: pulling in latest agents, skills, and hooks"
+  echo -e "  ${DIM}Source: $KIT_ROOT${NC}"
+  echo -e "  ${DIM}Target: $TARGET${NC}"
+  echo ""
+
+  if ! CI=true bash "$SCRIPT_DIR/migrate.sh" "$KIT_ROOT" "$TARGET"; then
+    error "Migration failed — check output above"
+    exit 1
+  fi
+
+  # Ensure log file exists now that .claude/ is present
+  mkdir -p "$TARGET/.claude"
+  : > "$LOG_FILE"
+
+  # Install hook dependencies
+  HOOK_DIR="$TARGET/.claude/hooks/skill-activation-prompt"
+  if [[ -f "$HOOK_DIR/package.json" ]]; then
+    info "Installing skill-activation-prompt hook dependencies..."
+    pushd "$HOOK_DIR" > /dev/null
+    if command -v bun &>/dev/null; then
+      if ! bun install --silent >> "$LOG_FILE" 2>&1; then
+        warn "bun install failed — see $LOG_FILE for details"
+      fi
+    elif command -v npm &>/dev/null; then
+      if ! npm install --silent >> "$LOG_FILE" 2>&1; then
+        warn "npm install failed — see $LOG_FILE for details"
+      fi
+    else
+      warn "Neither bun nor npm found. Run manually: cd $HOOK_DIR && npm install"
+    fi
+    popd > /dev/null
+    success "Hook dependencies installed"
+  fi
+
+  echo ""
+  header "Update Complete"
+  echo ""
+  echo -e "  ${GREEN}✓${NC} .claude/ updated in $TARGET/.claude"
+  echo -e "  ${DIM}  User-customized files were preserved${NC}"
+  echo ""
+  exit 0
+fi
 
 # ─── Phase 1: File Installation ───────────────────────────────────────────────
 if [[ "$MCP_ONLY" == "false" ]]; then
