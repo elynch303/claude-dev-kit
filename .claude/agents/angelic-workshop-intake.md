@@ -1,6 +1,6 @@
 ---
 name: angelic-workshop-intake
-description: "Sacred Space Coordinator. Sub-agent for the Angelic Workshop workflow — step 1: Sacred Space Preparation & Participant Intake. Creates personalized intake summary and invocation text from participant information. Invoked by angelic-workshop-lead only."
+description: "Angelic Workshop step 1 — participant intake summary and invocation text. Invoked by angelic-workshop-lead only."
 tools: Write
 model: sonnet
 color: blue

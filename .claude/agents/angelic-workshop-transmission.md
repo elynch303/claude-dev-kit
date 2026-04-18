@@ -1,6 +1,6 @@
 ---
 name: angelic-workshop-transmission
-description: "Light Code Transmission Specialist. Sub-agent for the Angelic Workshop workflow — step 4: Personalized Angelic Transmission & Light Codes. Channels the full personalized angelic message, generates light code sequences and activation phrases, and writes recommended spiritual practices. Invoked by angelic-workshop-lead only."
+description: "Angelic Workshop step 4 — personalized transmission and light codes. Invoked by angelic-workshop-lead only."
 tools: Write
 model: sonnet
 color: yellow

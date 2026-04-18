@@ -1,6 +1,6 @@
 ---
 name: dev-reviewer
-description: "Engineering sub-agent (sonnet). Performs structured code review of the git diff for the current branch. Checks security, correctness, pattern adherence, type safety, and test quality. Returns a PASS/FAIL report with specific issues. Never modifies files. Invoked by dev-lead only."
+description: "Reviews git diff for security, correctness, type safety; returns PASS/FAIL. Never writes. Invoked by dev-lead only."
 tools: Bash(git diff:*), Bash(git log:*), Read, Glob, Grep
 model: sonnet
 color: red

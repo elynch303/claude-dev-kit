@@ -1,6 +1,6 @@
 ---
 name: pm-prp-writer
-description: "PM sub-agent (sonnet). Deep-researches a feature using codebase analysis and web search, then authors a complete PRP document. Uses Gemini CLI for large codebase scans. Writes to PRPs/<slug>.md and returns the path with a confidence score. Invoked by project-manager only."
+description: "Researches feature and writes PRP to PRPs/<slug>.md; uses Gemini for large scans. Invoked by project-manager only."
 tools: Bash(gh:*), Bash(gemini:*), Read, Write, Glob, Grep, WebSearch
 model: sonnet
 color: green

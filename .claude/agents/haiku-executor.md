@@ -1,6 +1,6 @@
 ---
 name: haiku-executor
-description: Fast ephemeral worker that runs one-shot tasks in a clean context, then returns a concise result back to the main thread.
+description: "Fast ephemeral worker for one-shot tasks in a clean context; returns concise result."
 model: haiku
 color: red
 ---

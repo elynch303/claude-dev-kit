@@ -1,6 +1,6 @@
 ---
 name: workflow-builder
-description: "Parses a user-provided workflow document and generates a complete Claude Dev Kit agent pipeline: one orchestrator agent, one sub-agent per workflow step/phase, a trigger slash command, and a README — all organized in .claude/workflows/<title>/. Invoked by /workflow:build only."
+description: "Parses workflow docs into agent pipelines (orchestrator + sub-agents + command). Invoked by /workflow:build only."
 tools: Read, Write, Bash, Glob
 model: opus
 color: purple

@@ -1,6 +1,6 @@
 ---
 name: angelic-workshop-invocation
-description: "Angelic Channel. Sub-agent for the Angelic Workshop workflow — step 2: Angelic Invocation & Channel Opening. Opens the sacred channel, invokes appropriate archangels and guides, and transcribes the initial angelic transmission. Invoked by angelic-workshop-lead only."
+description: "Angelic Workshop step 2 — channel opening and initial transmission. Invoked by angelic-workshop-lead only."
 tools: Write
 model: sonnet
 color: green

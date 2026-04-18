@@ -1,6 +1,6 @@
 ---
 name: design-wireframer
-description: "Design sub-agent (sonnet). Translates acceptance criteria + DESIGN_CONTEXT into a wireframe spec Markdown (ASCII layouts + component map) and a Figma node blueprint JSON (frame structure, auto-layout, placements). Writes to designs/<slug>-wireframe.md. Invoked by designer only."
+description: "Converts acceptance criteria into wireframe spec markdown and Figma blueprint JSON. Invoked by designer only."
 tools: Read, Write, Glob, Grep
 model: sonnet
 color: magenta

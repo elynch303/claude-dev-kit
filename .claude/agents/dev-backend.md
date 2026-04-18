@@ -1,6 +1,6 @@
 ---
 name: dev-backend
-description: "Engineering sub-agent (sonnet). Implements backend work: API routes, route handlers, services, database queries, auth middleware, schema changes. Receives narrow task context from dev-lead. Returns FILES_CREATED, FILES_MODIFIED, and REVIEW_NOTES. Invoked by dev-lead only."
+description: "Implements API routes, services, DB queries, and schema changes. Invoked by dev-lead only."
 tools: Read, Write, Edit, Bash, Glob, Grep
 model: sonnet
 color: yellow

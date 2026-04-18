@@ -1,6 +1,6 @@
 ---
 name: dev-storybook-a11y
-description: "Storybook sub-agent (sonnet). Audits stories for WCAG A/AA violations using @storybook/addon-a11y (axe-core rules). Annotates stories with parameters.a11y overrides where violations are known/accepted. Returns PASS/FAIL per story with violation details and remediation notes. Invoked by dev-storybook only."
+description: "WCAG A/AA audit for Storybook stories; returns PASS/FAIL per story. Invoked by dev-storybook only."
 tools: Read, Write, Edit, Glob, Grep, Bash
 model: sonnet
 color: purple

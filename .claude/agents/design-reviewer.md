@@ -1,6 +1,6 @@
 ---
 name: design-reviewer
-description: "Design sub-agent (sonnet, READ-ONLY). Compares Figma frames (via MCP) against the code implementation on the current branch. Reports deviations in spacing, color, typography, variant coverage, and a11y affordances. Returns PASS/FAIL with a deviation table. Never modifies files. Invoked by designer only."
+description: "READ-ONLY. Compares Figma frames to code implementation, returns PASS/FAIL. Never writes. Invoked by designer only."
 tools: Read, Glob, Grep, Bash(git diff:*)
 model: sonnet
 color: magenta

@@ -1,6 +1,6 @@
 ---
 name: design-system-manager
-description: "Design sub-agent (sonnet). Creates Figma frames, variables (design tokens), component sets, and annotations via the Figma REST API using curl with X-Figma-Token. Consumes the wireframer's blueprint JSON. Returns FIGMA_FRAME_URLS, TOKENS_SYNCED, COMPONENTS_CREATED. Invoked by designer only."
+description: "Creates Figma frames, design tokens, and components via REST API; returns URLs. Invoked by designer only."
 tools: Read, Write, Bash(curl:*)
 model: sonnet
 color: magenta

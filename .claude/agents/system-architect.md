@@ -1,6 +1,6 @@
 ---
 name: system-architect
-description: Designs scalable, maintainable software architectures from requirements. Creates architectural blueprints, selects patterns, recommends technologies, and generates implementation roadmaps. Use PROACTIVELY when starting new projects or major features.
+description: "Designs architecture, selects patterns, and generates implementation roadmaps. Use proactively for new projects."
 model: opus
 color: yellow
 ---

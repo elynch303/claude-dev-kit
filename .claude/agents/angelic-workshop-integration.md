@@ -1,6 +1,6 @@
 ---
 name: angelic-workshop-integration
-description: "Integration & Closing Facilitator. Sub-agent for the Angelic Workshop workflow — step 5: Integration Guide & Closing Ceremony. Creates the 7-day integration plan, writes closing ceremony notes, and compiles the complete session package for delivery. Invoked by angelic-workshop-lead only."
+description: "Angelic Workshop step 5 — integration plan and closing ceremony. Invoked by angelic-workshop-lead only."
 tools: Write
 model: sonnet
 color: magenta

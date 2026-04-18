@@ -1,6 +1,6 @@
 ---
 name: validation-gates
-description: "Testing and validation specialist. Proactively runs tests, validates code changes, ensures quality gates are met, and iterates on fixes until all tests pass. Call this agent after you implement features and need to validate that they were implemented correctly. Be very specific with the features that were implemented and a general idea of what needs to be tested."
+description: "Runs tests and iterates fixes until all quality gates pass. Call post-implementation with specific context."
 tools: Bash, Read, Edit, MultiEdit, Grep, Glob, TodoWrite
 model: sonnet
 ---

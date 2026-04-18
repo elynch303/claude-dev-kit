@@ -1,6 +1,6 @@
 ---
 name: dev-storybook-play
-description: "Storybook sub-agent (sonnet). Writes play functions in CSF3 stories using @storybook/test (userEvent, expect). Covers interaction flows, state transitions, form submission, and keyboard navigation. Invoked by dev-storybook only."
+description: "Writes play functions for CSF3 stories (userEvent/expect). Invoked by dev-storybook only."
 tools: Read, Write, Edit, Glob, Grep
 model: sonnet
 color: purple

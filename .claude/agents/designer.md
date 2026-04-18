@@ -1,6 +1,6 @@
 ---
 name: designer
-description: "Design orchestrator (opus). Owns a design task end-to-end: reads Figma context, produces wireframes, creates Figma frames/tokens/components via API, and reviews implementation against design. Spawns design-researcher → design-wireframer → design-system-manager → design-reviewer. Does not write files directly. Requires Figma MCP."
+description: "Design orchestrator. Spawns 4 sub-agents end-to-end; requires Figma MCP. Does not write files directly."
 tools: Task, Bash(curl:*), Bash(gh:*), Read, Glob, Grep
 model: opus
 color: magenta

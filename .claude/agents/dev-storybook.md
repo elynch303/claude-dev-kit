@@ -1,6 +1,6 @@
 ---
 name: dev-storybook
-description: "Storybook orchestrator (sonnet). Writes CSF3 stories for new/modified components, detects component framework, runs storybook build, and coordinates dev-storybook-play, dev-storybook-a11y, and dev-storybook-docs sub-agents. Spawned by dev-lead after dev-frontend when Storybook is detected. Returns FILES_CREATED, FILES_MODIFIED, REVIEW_NOTES."
+description: "Storybook orchestrator. Writes CSF3 stories, coordinates play/a11y/docs sub-agents. Spawned by dev-lead."
 tools: Task, Read, Glob, Grep, Bash
 model: sonnet
 color: purple

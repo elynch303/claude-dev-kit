@@ -1,6 +1,6 @@
 ---
 name: pm-sizer
-description: "PM sub-agent (sonnet). Receives a list of groomed issues. Scores each across 5 complexity dimensions, assigns t-shirt sizes (XS/S/M/L/XL), produces confidence scores, and outputs a priority-ordered sprint plan. Returns a Markdown table and gh label commands. Invoked by project-manager only."
+description: "Scores issues across 5 dimensions, assigns t-shirt sizes, outputs sprint plan. Invoked by project-manager only."
 tools: Bash(gh:*), Read
 model: sonnet
 color: cyan

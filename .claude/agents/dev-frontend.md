@@ -1,6 +1,6 @@
 ---
 name: dev-frontend
-description: "Engineering sub-agent (sonnet). Implements UI work: components, pages, layouts, client state, routing, styling. Receives narrow task context from dev-lead including any backend API contracts. Returns FILES_CREATED, FILES_MODIFIED, and REVIEW_NOTES. Invoked by dev-lead only."
+description: "Implements UI — components, pages, routing, styling. Returns FILES_CREATED/MODIFIED. Invoked by dev-lead only."
 tools: Read, Write, Edit, Bash, Glob, Grep
 model: sonnet
 color: green

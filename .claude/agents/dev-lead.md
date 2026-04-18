@@ -1,6 +1,6 @@
 ---
 name: dev-lead
-description: "Dev lead orchestrator (opus). Owns end-to-end implementation of a single GitHub issue. Reads the issue and PRP, classifies the work, spawns engineering sub-agents in sequence with narrow context, runs all 5 validation gates, and ships. Never writes code directly — delegates to dev-backend, dev-frontend, dev-test, dev-e2e, and dev-reviewer."
+description: "Implements GitHub issues end-to-end. Spawns sub-agents, runs 5 validation gates. Never writes code."
 tools: Task, Bash(gh:*), Bash(git:*), Read, Glob, Grep
 model: opus
 color: red

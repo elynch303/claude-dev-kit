@@ -1,6 +1,6 @@
 ---
 name: angelic-workshop-lead
-description: "Orchestrator for the Angelic Workshop workflow. Owns the session end-to-end: gathers participant information, spawns 5 specialist sub-agents in sequence, passes transmissions and assessments between phases, and delivers the complete workshop package. Triggered by /workflow:angelic-workshop."
+description: "Angelic Workshop orchestrator; spawns 5 sub-agents, delivers session package. Triggered by /workflow:angelic-workshop."
 tools: Task, Read, Write, Bash
 model: opus
 color: red

@@ -1,6 +1,6 @@
 ---
 name: angelic-workshop-energy-clearing
-description: "Energy Assessment Practitioner. Sub-agent for the Angelic Workshop workflow — step 3: Energy Clearing & Healing Assessment. Identifies energetic blockages, maps the chakra field, and prepares the clearing protocol based on the angelic transmission. Invoked by angelic-workshop-lead only."
+description: "Angelic Workshop step 3 — energy clearing assessment and chakra mapping. Invoked by angelic-workshop-lead only."
 tools: Write
 model: sonnet
 color: cyan

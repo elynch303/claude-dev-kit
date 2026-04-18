@@ -1,6 +1,6 @@
 ---
 name: dev-e2e
-description: "Engineering sub-agent (sonnet). Writes Playwright or Cypress E2E tests for user-visible flows introduced by the current issue. Spawned only when changes affect pages or user journeys. Returns test file paths. Invoked by dev-lead only — does NOT run tests."
+description: "Writes Playwright/Cypress E2E tests for user-visible flows. Does NOT run tests. Invoked by dev-lead only."
 tools: Read, Write, Edit, Glob, Grep
 model: sonnet
 color: orange

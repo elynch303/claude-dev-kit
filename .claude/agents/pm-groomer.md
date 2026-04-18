@@ -1,6 +1,6 @@
 ---
 name: pm-groomer
-description: "PM sub-agent (sonnet). Receives a GitHub issue and relevant source file paths. Rewrites the issue with structured acceptance criteria (Given/When/Then), Definition of Done checklist, and decomposed sub-tasks. Returns improved issue body as Markdown. Invoked by project-manager only."
+description: "Rewrites GitHub issues with Given/When/Then ACs, DoD checklist, and sub-tasks. Invoked by project-manager only."
 tools: Bash(gh:*), Read, Glob, Grep
 model: sonnet
 color: blue

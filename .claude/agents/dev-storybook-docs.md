@@ -1,6 +1,6 @@
 ---
 name: dev-storybook-docs
-description: "Storybook sub-agent (sonnet). Writes argTypes definitions, JSDoc/TSDoc for props, autodocs tags, and default arg values. Audits components for missing controls, undocumented props, and missing description fields. Returns coverage report (% of props documented) and files modified. Invoked by dev-storybook only."
+description: "Writes argTypes, JSDoc, autodocs, and default args; returns prop coverage report. Invoked by dev-storybook only."
 tools: Read, Write, Edit, Glob, Grep
 model: sonnet
 color: purple

@@ -1,6 +1,6 @@
 ---
 name: dev-test
-description: "Engineering sub-agent (sonnet). Writes unit and integration tests for files produced by dev-backend and dev-frontend. Targets 90%+ branch coverage on new/modified files. Follows existing test patterns. Returns test file paths and coverage estimate. Invoked by dev-lead only — does NOT run tests."
+description: "Writes unit/integration tests targeting 90%+ coverage. Does NOT run tests. Invoked by dev-lead only."
 tools: Read, Write, Edit, Glob, Grep
 model: sonnet
 color: blue

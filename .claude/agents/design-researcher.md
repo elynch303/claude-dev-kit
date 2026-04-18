@@ -1,6 +1,6 @@
 ---
 name: design-researcher
-description: "Design sub-agent (sonnet). Reads Figma file structure, existing component library, styles, and design tokens via the Figma MCP. Also searches the codebase for existing design token modules and component usages. Returns DESIGN_CONTEXT. Invoked by designer only."
+description: "Reads Figma structure, component library, and design tokens; returns DESIGN_CONTEXT. Invoked by designer only."
 tools: Read, Glob, Grep
 model: sonnet
 color: magenta

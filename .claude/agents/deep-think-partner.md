@@ -1,6 +1,6 @@
 ---
 name: deep-think-partner
-description: "Use this agent when you encounter complex logical problems, multi-step reasoning challenges, strategic decisions requiring deep analysis, or situations where you need to validate your reasoning through collaborative thinking."
+description: "Collaborative reasoning for complex logic, strategic decisions, and multi-step analysis."
 model: opus
 color: blue
 ---
