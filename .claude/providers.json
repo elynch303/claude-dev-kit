@@ -16,7 +16,7 @@
       "type": "piped",
       "available": true,
       "strengths": ["reasoning", "agents", "coding", "architecture", "orchestration"],
-      "context_window": 200000,
+      "context_window": 1000000,
       "notes": "Primary orchestrator. Always available when running inside Claude Code."
     },
     "gemini": {

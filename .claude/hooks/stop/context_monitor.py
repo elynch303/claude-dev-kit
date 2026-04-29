@@ -10,7 +10,7 @@ from pathlib import Path
 
 THRESHOLD_WARN = 65
 THRESHOLD_STOP = 85
-CONTEXT_LIMIT = 200000
+CONTEXT_LIMIT = 1000000
 
 CACHE_DIR = Path("/tmp/.claude_context_cache")
 CACHE_TTL = 30

@@ -380,7 +380,7 @@ Claude Code is always the **orchestrator** — it never becomes a different AI. 
 
 | Provider | CLI | Best for | Context | Local? |
 |----------|-----|---------|---------|--------|
-| **Claude** | `claude` | Reasoning, agents, architecture | 200k | No |
+| **Claude** | `claude` | Reasoning, agents, architecture | **1M** | No |
 | **Gemini** | `gemini` | Entire codebase scans, web search | **1M** | No |
 | **Codex** | `opencode` | Code generation, completion | 128k | No |
 | **Grok** | `opencode` | Speed, quick analysis | 131k | No |
